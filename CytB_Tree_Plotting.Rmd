@@ -1,0 +1,243 @@
+---
+title: "CytB Tree Plot"
+author: "Jon Nations"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+# Plotting the cytB trees for the sumatra description 
+
+This will look differet, but I can use a lot of the tricks fromm the secies tree.
+
+## Load Data and Packages
+```{r}
+pacman::p_load(treedataverse, tidyverse, ape, TDbook, ggbreak, patchwork, ggpubr)
+
+```
+
+```{r}
+#cytb <- read.nexus('trees/CytB_20220711.nex')
+
+cytb2 <- treeio::read.iqtree('trees/cytb_names_no_lasi.nex.contree')
+
+#cytb2 <- root(cytb2, outgroup = "Suncus_murinus_AB033610.1", edgelabel = T, resolve.root = T)
+node<-which(cytb2@phylo$tip.label=="Suncus.murinus.AB033610.1")
+position<-0.5*cytb2@phylo$edge.length[which(cytb2@phylo$edge[,2]== node)]
+cytb2@phylo <- phytools::reroot(cytb2@phylo, node, position)
+```
+
+Quick Plot works.
+```{r}
+ggtree(cytb2) + geom_tiplab()
+```
+
+Alright, things to do
+
+```{r}
+#newname <- gsub("__\\A-Za-z\\__", " (\\A-Za-z\\) ", cytb$tip.label)
+tt <- cytb2@phylo$tip.label 
+tt2 <- str_split_fixed(tt, "_", 6)
+tt2 <- as.data.frame(tt2) %>% select(!c('V3', 'V5'))
+tt2 <- tidyr::unite(tt2, 'C1', V1:V2, sep = " ")
+tt2 <- tidyr::unite(tt2, 'C1', c("C1", "V4"), sep = " (")
+newnames <- tidyr::unite(tt2, "tip.label", c("C1", "V6"), sep = ") ") %>% mutate(tip.label = recode(tip.label, 'Suncus.murinus.AB033610.1  () '= "Suncus murinus AB033610.1"))
+#newnames <- newnames %>% mutate_all( ~ str_replace_all(., "_", " "))
+cytb2@phylo$tip.label <- as.character(newnames$tip.label)
+```
+
+ggtree::flip(p, getMRCA(mcc@phylo, c("hutanis", "brunnea")), getMRCA(mcc@phylo, c("foetida", "negrina")))
+p <- ggtree::flip(p, getMRCA(mcc@phylo, c("monticola", "umbra")), getMRCA(mcc@phylo, c("balingka", "dewi")))
+```{r}
+p <- ggtree(cytb2)
+p2 <-p + geom_tiplab(align = F, size = 2.8) + 
+  #geom_treescale(x = 0.01, y = 0, width=0.001, offset = 0.2, fontsize = 3) +
+    #scale_size_continuous(range = c(3, 10)) 
+  xlim(0, 0.75)
+
+p3 <- p2 + scale_x_break(c(0.04, 0.17)) + hexpand(1) 
+p3
+```
+
+
+```{r}
+p4 <- ggtree::flip(p3, getMRCA(cytb2@phylo, c("Crocidura monticola (Java-Slamet) MZB32148", "Crocidura tanakae (Taiwan) NTU971" )), getMRCA(cytb2@phylo, c("Crocidura hutanis (Sumatra-Singgalang) LSUMZ40210", "Crocidura paradoxura (Sumatra-Singgalang) FMNH212954")))
+
+p5 <- ggtree::flip(p4, getMRCA(cytb2@phylo, c("Crocidura tanakae (Taiwan) NTU971", "Crocidura neglecta (Sumatra-Tujuh) FMNH212877" )), getMRCA(cytb2@phylo, c("Crocidura balingka (Sumatra-Singgalang) FMNH212952", "Crocidura barapi (Sumatra-Talamau) LSUMZ39752")))
+
+p6 <- ggtree::flip(p5, getMRCA(cytb2@phylo, c("Crocidura tanakae (Taiwan) NTU971",  "Crocidura neglecta (Sumatra-Tujuh) FMNH212877" )), getMRCA(cytb2@phylo, c("Crocidura wuchihensis (China) ROM116090", "Crocidura kurodai (Taiwan) NTU980")))
+p6
+```
+
+```{r}
+hili <- function(node) {
+  geom_hilight(
+      node={{node}}, 
+      alpha = 0.4,
+      extend=0.3,
+      type = 'roundrect',
+      color=NA,
+      fill="#7AD151")
+}
+
+getMRCA(cytb2@phylo, c("Crocidura balingka (Sumatra-Singgalang) FMNH212952",
+                   "Crocidura barapi (Sumatra-Talamau) LSUMZ39752"))
+getMRCA(cytb2@phylo, c("Crocidura neglecta (Sumatra-Tujuh) FMNH212877",
+                   "Crocidura neglecta (Sumatra-Talamau) LSUMZ39811"))
+getMRCA(cytb2@phylo, c("Crocidura paradoxura (Sumatra-Singgalang) FMNH212954",
+                   "Crocidura paradoxura (Sumatra-Tujuh) FMNH213415"))
+getMRCA(cytb2@phylo,  c("Crocidura hutanis (Sumatra-Talamau) LSUMZ39788",
+                   "Crocidura lepidura (Sumatra-Tujuh) FMNH212856"))
+getMRCA(cytb2@phylo, c("Crocidura vosmaeri (Sumatra-Bangka-Island) LSUMZ38078",
+                   "Crocidura beccarii (Sumatra-Singgalang) LSUMZ40243"))
+```
+
+
+
+```{r}
+p7 <- p6 +  hili(196) + hili(181) + hili(137) + hili(156) + hili(146) 
+p7
+ggsave("Cyt_B_tree_1.pdf", width = 8, height = 10.5)
+```
+
+## Collapse nodes
+```{r}
+# orientalis n=3
+getMRCA(cytb2@phylo, c("Crocidura orientalis (Java-Ciremai) MZB28402" , "Crocidura orientalis (Java-Gede) FMNH212778"  ))
+#brunnea n=3
+getMRCA(cytb2@phylo, c("Crocidura brunnea (Java-Slamet) MZB32084" , "Crocidura brunnea (Java-Ijen) LSUMZ37945"  ))
+#Philippines n=12
+getMRCA(cytb2@phylo, c("Crocidura ninoyi (Philippines) FMNH145685" , "Crocidura beatus (Philippines) FMNH146965"  ))
+#foetida n=2
+getMRCA(cytb2@phylo, c("Crocidura foetida (Borneo-Sarawak) USNM590298" , "Crocidura foetida (Borneo-Sarawak) USNM590299"  ))
+#monticola A n=4
+getMRCA(cytb2@phylo, c("Crocidura monticola (Java-Slamet) LSUMZ37988" , "Crocidura monticola (Java-Gede) MZB33648"  ))
+#umbra n=3
+getMRCA(cytb2@phylo, c("Crocidura umbra (Java-Gede) FMNH212779" , "Crocidura umbra (Java-Gede) FMNH212785"  ))
+#maxi n=4
+getMRCA(cytb2@phylo, c("Crocidura maxi (Java-Ijen) LSUMZ37982" , "Crocidura maxi (Bali) WAM38557"  ))
+#elongata n=2
+getMRCA(cytb2@phylo, c("Crocidura elongata (Sulawesi) LSUMZ36906" , "Crocidura elongata (Sulawesi) LSUMZ36907"  ))
+
+#########3
+#ADDING SOME SUMATRAN SPECIES ON
+#############
+#paradoxura n=5
+getMRCA(cytb2@phylo, c("Crocidura paradoxura (Sumatra-Tujuh) FMNH212886" , "Crocidura paradoxura (Sumatra-Singgalang) FMNH212956"  ))
+#hutanis n=8
+getMRCA(cytb2@phylo, c("Crocidura hutanis (Sumatra-Leuser) MVZ192174" , "Crocidura hutanis (Sumatra-Singgalang) FMNH212950"  ))
+#lepidura n=6
+getMRCA(cytb2@phylo, c("Crocidura lepidura (Sumatra-Tujuh) FMNH212863" , "Crocidura lepidura (Sumatra-Tujuh) FMNH212859" ))
+#beccarii n=6
+getMRCA(cytb2@phylo, c("Crocidura beccarii (Sumatra-Tujuh) FMNH212834" , "Crocidura beccarii (Sumatra-Singgalang) FMNH212953" ))
+#vosmaeri n=3
+getMRCA(cytb2@phylo, c("Crocidura vosmaeri (Sumatra-Bangka-Island) LSUMZ38078" , "Crocidura vosmaeri (Sumatra-Bangka-Island) LSUMZ38076" ))
+#neglecta sumatra n=9
+getMRCA(cytb2@phylo, c("Crocidura neglecta (Sumatra-Talamau) LSUMZ39807" , "Crocidura neglecta (Sumatra-Tujuh) FMNH212877" ))
+```
+
+```{r}
+claps1 <- scaleClade(p6,     154, 0.18) 
+claps1 <- scaleClade(claps1, 169,  0.18) 
+claps1 <- scaleClade(claps1, 125, 0.18) 
+claps1 <- scaleClade(claps1, 136, 0.18) 
+claps1 <- scaleClade(claps1, 223, 0.18)
+claps1 <- scaleClade(claps1, 226, 0.18)
+claps1 <- scaleClade(claps1, 230, 0.18)
+claps1 <- scaleClade(claps1, 229, 0.18)
+claps1 <- scaleClade(claps1, 137, 0.18)
+claps1 <- scaleClade(claps1, 157, 0.18)
+claps1 <- scaleClade(claps1, 164, 0.18)
+claps1 <- scaleClade(claps1, 147, 0.18)
+claps1 <- scaleClade(claps1, 152, 0.18)
+claps1 <- scaleClade(claps1, 181, 0.18)
+
+
+claps2 <- ggtree::collapse(claps1, node = 154, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=154, label="Crocidura orientalis (n=3)", offset = .015, fontsize = 3) 
+
+claps3 <- collapse(claps2, node = 169, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=169, label="Crocidura brunnea (n=3)", offset = .007, fontsize = 3)
+
+claps4 <- collapse(claps3, node = 125, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=125, label="Philippines (n=12)", offset = .055, fontsize = 3) 
+
+claps5 <- collapse(claps4, node = 136, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=136, label="Crocidura foetida (n=2)", offset = .01, fontsize = 3)
+
+claps6 <- collapse(claps5, node = 223, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=223, label="Crocidura monticola A (n=4)", offset = .01, fontsize = 3)
+
+claps7 <- collapse(claps6, node = 226, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=226, label="Crocidura umbra (n=3)", offset = .0025, fontsize = 3)
+
+claps8 <- collapse(claps7, node = 230, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=230, label="Crocidura maxi (n=4)", offset = .05, fontsize = 3) 
+
+claps9 <- collapse(claps8, node = 229, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=229, label="Crocidura elongata (n=2)", offset = .01, fontsize = 3)
+
+claps10 <- collapse(claps9, node = 137, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=137, label="Crocidura paradoxura (n=5)", offset = .02, fontsize = 3) 
+
+claps11 <- collapse(claps10, node = 157, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=157, label="Crocidura hutanis (n=8)", offset = .02, fontsize = 3) 
+
+claps12 <- collapse(claps11, node = 164, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=164, label="Crocidura lepidura (n=5)", offset = .02, fontsize = 3) 
+
+claps13 <- collapse(claps12, node = 147, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=147, label="Crocidura beccarii (n=6)", offset = .02, fontsize = 3) 
+
+claps14 <- collapse(claps13, node = 152, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=152, label="Crocidura vosmaeri (n=3)", offset = .02, fontsize = 3)
+
+
+claps15 <- ggtree::flip(claps14, getMRCA(cytb2@phylo, c("Crocidura tanakae (Taiwan) NTU971", "Crocidura neglecta (Sumatra-Tujuh) FMNH212877" )), getMRCA(cytb2@phylo, c("Crocidura balingka (Sumatra-Singgalang) FMNH212952", "Crocidura barapi (Sumatra-Talamau) LSUMZ39752"))) 
+
+claps16 <- collapse(claps15, node = 181, 'max', fill="white", color = 'black') + 
+  geom_cladelab(node=181, label="Crocidura neglecta - Sumatra (n=9)", offset = .08, fontsize = 3) +  
+  hili(196) + hili(181) + hili(137) + hili(156) + hili(146)
+
+claps16
+
+ggsave("Cyt_B_tree_2.pdf", width = 8, height = 10.5)
+```
+
+
+
+```{r}
+library(operators)
+p8 <- claps16 + 
+  geom_nodelab(aes(x=branch, label=round(UFboot, 2), 
+                   subset = !is.na(as.numeric(UFboot)) & 
+                     as.numeric(UFboot) < 95 #&
+                     #node %!in% drp
+                   ),
+               vjust=.9, 
+               hjust = -.95, 
+               size = 1.75) +
+  geom_nodepoint(aes(label=UFboot, 
+                     subset = UFboot > 95 #&
+                     #node %!in% drp
+                     ), 
+                 size = 2, 
+                 color ="black", 
+                 alpha = 1)  #+
+  #eom_nodepoint(aes(label=UFboot, 
+  #                  subset = !is.na(as.numeric(UFboot)) &
+  #                    as.numeric(UFboot) > 70 & 
+  #                    as.numeric(UFboot) < 90 #&
+  #                  #node %!in% drp
+  #                  ), 
+  #              size = 2, color ="grey40", 
+  #              alpha = 1, 
+  #              shape = 15)
+#pa4 + geom_treescale(x = 0.001, y = 0, width=0.5, offset = 0.5, fontsize = 3)
+p8 + geom_treescale(width = 0.01,
+                     y = 14.2,
+                     offset = 0.5,
+                     fontsize = 3)
+ggsave("Cyt_B_tree_3.pdf", width = 8, height = 10.5)
+```
+

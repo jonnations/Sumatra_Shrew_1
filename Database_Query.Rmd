@@ -1,0 +1,60 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+A place to play with the big database.
+
+```{r}
+pacman::p_load(tidyverse)
+
+dat <- read_csv("/Users/Dicrostonyx/Documents/Projects/Soricidae/Sunda_Shrew_Database/shrew_database/shrew_database.csv") %>% mutate(Catalog = as.character(Catalog))
+```
+
+```{r}
+dat %>% filter( Catalog == "218747")
+```
+
+
+```{r}
+d <- dat %>% filter(Island == 'Sumatra' & Museum == 'LSUMZ' ) %>% 
+  filter(grepl('skin', Prep)) %>% select(c('Catalog', 'Collector', 'Species')) #%>% write_csv('Sumatra_LSU_skins.csv')
+```
+
+
+```{r}
+d <- dat %>% filter(Catalog == '39782') # & Museum == 'LSUMZ' ) %>% 
+ # filter(grepl('skin', Prep)) %>% select(c('Catalog', 'Collector', 'Species')) #%>% write_csv('Sumatra_LSU_skins.csv')
+```
+
+humerus pca
+```{r}
+d2 <- dat %>% drop_na(44:47) 
+  as_tibble() 
+
+pc <- prcomp(d2[,44:47], scale = TRUE)
+
+pc$x <- as.data.frame(pc$x) %>%  bind_cols(Species = d2$Species, Catalog = d2$Catalog)
+
+d3 <- pc$x
+
+hull_clade <- d3 %>% 
+  group_by(Species) %>% 
+  slice(chull(PC1, PC2))
+  
+p1 <- d3 %>% 
+  ggplot(aes(x = PC1, y = PC2, color = Species, fill = Species, shape = Species)) +
+  geom_polygon(data = hull_clade, alpha = 0.4) +
+  geom_point(size = 3, stroke = 1) +
+    scale_shape_manual(values = rep(1:10, 5), name = "Species") +
+    #scale_fill_brewer(palette = "Dark2", name = "Species") +
+    #scale_color_brewer(palette = "Dark2", name = "Species") +
+    theme_bw() +
+    theme(legend.text = element_text(face = "italic", size = 12)) +
+   labs(
+    x = "Linear PC1 (91%)",
+    y = "Linear PC2 (3%)"
+  )
+p1
+```
+

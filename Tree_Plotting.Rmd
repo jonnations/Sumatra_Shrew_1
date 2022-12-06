@@ -1,0 +1,230 @@
+---
+title: "Tree Plotting"
+output: html_notebook
+---
+
+# Plotting the trees for the sumatra description 
+
+## Load Data and Packages
+```{r}
+pacman::p_load(treedataverse, tidyverse, ape, TDbook, ggbreak, patchwork, ggpubr)
+
+```
+
+```{r}
+mcc <- read.beast('trees/species_MCC.tree')
+```
+
+hmm, long 'outgroup' branch, but deal with that later
+What do I want to plot? Traits? Islands? Let's start with islands
+Manually making a mcc_treedata.csv
+```{r}
+tdata <- read_csv('trees/mcc_treedata.csv')
+```
+
+#### Quick Plot 
+
+```{r}
+ggtree(mcc) + geom_tiplab()
+```
+
+## Tree with All Localities Points
+Attach treedata and sample plot
+```{r}
+
+p <- ggtree(mcc) %<+% tdata 
+
+p2 <- p + geom_tiplab(offset = 0.0006, size = 3.5) + 
+    geom_tippoint(aes(x=x+0.0004, color = island, fill = island, shape = island), size = 3) + 
+  geom_treescale(x = 0.01, y = 0, width=0.001, offset = 0.2, fontsize = 3) +
+    #scale_size_continuous(range = c(3, 10)) 
+     scale_fill_brewer(type = 'qual', palette = "Dark2") +
+  scale_color_brewer(type = 'qual', palette = "Dark2") +
+  xlim(0, 0.018)
+
+legend <- as_ggplot(ggpubr::get_legend(p2))
+
+p3 <- p2 + scale_x_break(c(0.001, 0.005)) + hexpand(1) 
+p4 <- p3 + theme(legend.position = c(0.5, 0.5),
+                 legend.title = element_blank())
+#p5 <- p4   +   inset_element(legend, 0, 0.5, 0.2 ,1) 
+p4
+ggsave('trees/mcc_tree1.pdf')
+```
+
+```{r}
+legend
+ggsave('trees/mcc_legend.pdf')
+```
+
+```{r}
+p4 + theme(legend.position = 'none')
+ggsave('trees/mcc_tree1_no_legend.pdf')
+```
+
+
+Ok, how to make this better?
+
+
+
+
+geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.9), size = 1.7, color ="grey30", alpha = 0.8)
+
+```{r}
+p4 + 
+  geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.9), size = 1.7, color ="black", alpha = 1) + 
+  geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.5 & as.numeric(posterior) < 0.9), size = 1.7, color ="grey40", alpha = 1, shape = 15) +
+  geom_nodelab(aes(x=branch, label=round(posterior, 2), 
+                   subset = !is.na(as.numeric(posterior)) & 
+                     as.numeric(posterior) < .5),
+               vjust=-.5, 
+               #hjust = .7, 
+               size = 1.5)
+ggsave('trees/mcc_tree1_nodes.pdf', width = 6, height = 6.5)
+```
+
+# Tree Sumatra Nodepoint
+
+```{r}
+tdata3 <- tdata %>% #column_to_rownames("label") %>%
+  mutate(island = fauxnaif::na_if_in(island, "Mainland", "Borneo", "Sulawesi", "Philippines", "Java"))
+
+p <- ggtree(mcc) %<+% tdata3
+p <- ggtree::flip(p, getMRCA(mcc@phylo, c("hutanis", "brunnea")), getMRCA(mcc@phylo, c("foetida", "negrina")))
+p <- ggtree::flip(p, getMRCA(mcc@phylo, c("monticola", "umbra")), getMRCA(mcc@phylo, c("balingka", "dewi")))
+
+p2 <- p + geom_tiplab(offset = 0.0002, size = 3.5) + 
+    geom_tippoint(aes(x=x+0.0001, color = island, fill = island, shape = island), size = 3) + 
+  geom_treescale(x = 0.01, y = 0, width=0.001, offset = 0.2, fontsize = 3) +
+    #scale_size_continuous(range = c(3, 10)) 
+     scale_fill_brewer(type = 'qual', palette = "Dark2") +
+  scale_color_brewer(type = 'qual', palette = "Dark2") +
+  xlim(0, 0.018)
+
+legend <- as_ggplot(ggpubr::get_legend(p2))
+
+p3 <- p2 + scale_x_break(c(0.001, 0.005)) + hexpand(1) 
+p4 <- p3 + theme(legend.position = "none",
+                 legend.title = element_blank())
+#p5 <- p4   +   inset_element(legend, 0, 0.5, 0.2 ,1) 
+p5 <- p4 + geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.9), size = 1.7, color ="black", alpha = 1) + 
+  geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.5 & as.numeric(posterior) < 0.9), size = 1.7, color ="grey40", alpha = 1, shape = 15) +
+  geom_nodelab(aes(x=branch, label=round(posterior, 2), 
+                   subset = !is.na(as.numeric(posterior)) & 
+                     as.numeric(posterior) < .5),
+               vjust=.9, 
+               hjust = -.95, 
+               size = 1.75)
+p5
+ggsave('trees/mcc_tree1_nodes_sum.pdf', width = 5, height = 6.5)
+```
+
+
+## Tree Plot All Localities Heatmap
+```{r}
+tdata2 <- tdata %>% column_to_rownames("label")
+p <- ggtree(mcc) 
+p <- ggtree::flip(p, getMRCA(mcc@phylo, c("hutanis", "brunnea")), getMRCA(mcc@phylo, c("foetida", "negrina")))
+p <- ggtree::flip(p, getMRCA(mcc@phylo, c("monticola", "umbra")), getMRCA(mcc@phylo, c("balingka", "dewi")))#+ rotate(p2, 36)
+p2 <- p + geom_tiplab(offset = 0.0006, size = 3.5) + 
+    #geom_tippoint(aes(x=x+0.0004, color = island, fill = island, shape = island), size = 3) + 
+  geom_treescale(x = 0.01, y = 0, width=0.001, offset = 0.2, fontsize = 3) +
+  xlim(0, 0.018)
+#p2 <-   ggtree::rotate(p2, 36)
+
+#legend <- as_ggplot(ggpubr::get_legend(p2))
+
+p3 <- p2 + scale_x_break(c(0.001, 0.005)) + hexpand(1) 
+p4 <- p3 + theme(legend.position = c(0.5, 0.5),
+                 legend.title = element_blank())
+#p5 <- p4   +   inset_element(legend, 0, 0.5, 0.2 ,1) 
+p4
+
+
+p5 <- gheatmap(p4, tdata2, offset=0, width=0.025, font.size=2, colnames=F, hjust=0) + 
+     scale_fill_brewer(type = 'qual', palette = "Dark2") +
+  scale_color_brewer(type = 'qual', palette = "Dark2") 
+p6 <- p5 + geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.9), size = 1.7, color ="black", alpha = 1) + 
+  geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.5 & as.numeric(posterior) < 0.9), size = 1.7, color ="grey40", alpha = 1, shape = 15) +
+  geom_nodelab(aes(x=branch, label=round(posterior, 2), 
+                   subset = !is.na(as.numeric(posterior)) & 
+                     as.numeric(posterior) < .5),
+               vjust=.9, 
+               hjust = -.95, 
+               size = 1.75)
+p6
+
+ggsave('trees/mcc_tree1_heatmap1.pdf', width = 6, height = 6.5)
+```
+
+## Tree Plot Sumatra Java Heatmap
+```{r}
+p <- ggtree(mcc) 
+p <- ggtree::flip(p, getMRCA(mcc@phylo, c("hutanis", "brunnea")), getMRCA(mcc@phylo, c("foetida", "negrina")))
+p <- ggtree::flip(p, getMRCA(mcc@phylo, c("monticola", "umbra")), getMRCA(mcc@phylo, c("balingka", "dewi")))#+ rotate(p2, 36)
+p2 <- p + geom_tiplab(offset = 0.0006, size = 3.5) + 
+    #geom_tippoint(aes(x=x+0.0004, color = island, fill = island, shape = island), size = 3) + 
+  geom_treescale(x = 0.01, y = 0, width=0.001, offset = 0.2, fontsize = 3) +
+  xlim(0, 0.018)
+#p2 <-   ggtree::rotate(p2, 36)
+
+#legend <- as_ggplot(ggpubr::get_legend(p2))
+
+p3 <- p2 + scale_x_break(c(0.001, 0.005)) + hexpand(1) 
+p4 <- p3 + theme(legend.position = c(0.5, 0.5),
+                 legend.title = element_blank())
+#p5 <- p4   +   inset_element(legend, 0, 0.5, 0.2 ,1) 
+p4
+
+tdata3 <- tdata %>% column_to_rownames("label") %>%
+  mutate(island = fauxnaif::na_if_in(island, "Mainland", "Borneo", "Sulawesi", "Philippines"))
+
+p5 <- gheatmap(p4, tdata3, offset=0, width=0.025, font.size=2, colnames=F, hjust=0) + 
+   scale_fill_manual(breaks=c( "Java", "Sumatra"), 
+        values=c("#414487", "#7AD151"), na.value = "white")
+p6 <- p5 + geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.9), size = 1.7, color ="black", alpha = 1) + 
+  geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.5 & as.numeric(posterior) < 0.9), size = 1.7, color ="grey40", alpha = 1, shape = 15) +
+  geom_nodelab(aes(x=branch, label=round(posterior, 2), 
+                   subset = !is.na(as.numeric(posterior)) & 
+                     as.numeric(posterior) < .5),
+               vjust=.9, 
+               hjust = -.95, 
+               size = 1.75)
+p6
+ggsave('trees/mcc_tree1_heatmap2.pdf', width = 6, height = 6.5)
+```
+
+## Tree Plot Sumatra Heatmap
+```{r}
+p <- ggtree(mcc) 
+p <- ggtree::flip(p, getMRCA(mcc@phylo, c("hutanis", "brunnea")), getMRCA(mcc@phylo, c("foetida", "negrina")))
+p <- ggtree::flip(p, getMRCA(mcc@phylo, c("monticola", "umbra")), getMRCA(mcc@phylo, c("balingka", "dewi")))
+p2 <- p + geom_tiplab(offset = 0.0003, size = 3.5) + 
+    #geom_tippoint(aes(x=x+0.0004, color = island, fill = island, shape = island), size = 3) + 
+  geom_treescale(x = 0.01, y = 0, width=0.001, offset = 0.2, fontsize = 3) +
+  xlim(0, 0.018)
+#p2 <-   ggtree::rotate(p2, 36)
+
+#legend <- as_ggplot(ggpubr::get_legend(p2))
+
+p3 <- p2 + scale_x_break(c(0.001, 0.005)) + hexpand(1) 
+p4 <- p3 + theme(legend.position = c(0.5, 0.5),
+                 legend.title = element_blank())
+tdata3 <- tdata %>% column_to_rownames("label") %>%
+  mutate(island = fauxnaif::na_if_in(island, "Mainland", "Borneo", "Sulawesi", "Philippines", "Java"))
+
+p5 <- gheatmap(p4, tdata3, offset=-.000175, width=0.02, font.size=2, colnames=F, hjust=0) + 
+   scale_fill_manual(breaks=c( "Sumatra"), 
+        values=c("#7AD151"), na.value = "white") + theme(legend.position = 'none')
+p6 <- p5 + geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.9), size = 1.7, color ="black", alpha = 1) + 
+  geom_nodepoint(aes( label=posterior, subset = !is.na(as.numeric(posterior)) & as.numeric(posterior) > 0.7 & as.numeric(posterior) < 0.9), size = 1.7, color ="grey40", alpha = 1, shape = 15) +
+  geom_nodelab(aes(x=branch, label=round(posterior, 2), 
+                   subset = !is.na(as.numeric(posterior)) & 
+                     as.numeric(posterior) < .7),
+               vjust=.9, 
+               hjust = -.95, 
+               size = 1.75)
+p6
+ggsave('trees/mcc_tree1_heatmap3.pdf', width = 5, height = 6.5)
+```
+

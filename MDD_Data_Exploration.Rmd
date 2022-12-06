@@ -1,0 +1,76 @@
+---
+title: "MDD Data Exploration"
+output: html_notebook
+---
+
+
+Looking at the descriptions of Crocidura Shrews using MDD. 
+
+Plotting a species accumulation curve. 
+### Load
+```{r}
+pacman::p_load(tidyverse)
+
+#Pull the most recent MDD database from GitHub
+
+dat <- read_csv('https://raw.githubusercontent.com/mammaldiversity/mammaldiversity.github.io/master/_data/mdd.csv')
+```
+
+How many Crocidurines?
+```{r}
+dat %>% filter(order == "CARNIVORA") %>% 
+  #filter(subfamily == "CROCIDURINAE") %>% 
+  #group_by(genus) %>% 
+  count('specificEpithet')
+```
+
+Percentages of mammalian diversity
+```{r}
+dat %>% filter(extinct == "0") %>% group_by(order) %>% 
+ summarise(n = n(),
+           p = (n/6495)*100) %>% 
+  filter(order %in% c('RODENTIA', 'CARNIVORA'))
+```
+
+```{r}
+dat %>% filter(extinct == "0") %>% group_by(family) %>% 
+ summarise(n = n(),
+           p = (n/6495)*100) %>% 
+  filter(family =='SORICIDAE')
+```
+
+
+### Accumulation curve
+
+```{r}
+dat %>% filter(genus == "Crocidura") %>% 
+  group_by(authoritySpeciesYear) %>% 
+  summarise(n = n()) %>% 
+  
+  ggplot(aes(authoritySpeciesYear, cumsum(n))) + 
+  geom_line() +
+  labs(x = "Year",
+       y = "Number of Species") +
+  theme_bw()
+```
+
+### Which Genera have the most species?
+
+```{r}
+dat %>%  
+  group_by(genus) %>% 
+  summarise(n = n())  %>% 
+  arrange(desc(n)) %>% 
+  filter(n > 50) %>% 
+  
+  ggplot(aes(reorder(genus, -n), n)) + 
+  geom_bar(stat = 'identity') +
+  theme_bw()
+```
+
+### Which Papers have decsribed recent species?
+
+```{r}
+dat %>% select(sciName, genus, authoritySpeciesAuthor, authoritySpeciesYear) %>% filter(genus == 'Crocidura', authoritySpeciesYear >= 2000) %>% arrange(desc(authoritySpeciesYear))
+```
+

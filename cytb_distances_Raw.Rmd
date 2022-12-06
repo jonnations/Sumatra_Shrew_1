@@ -1,0 +1,144 @@
+---
+title: "CytB Differences"
+output: html_notebook
+---
+
+Make a matrix of cytb differences.
+
+I think I can do this with Ape and the Unique Sequences phylip file
+
+
+```{r}
+pacman::p_load(ape, tidyverse, kableExtra)
+```
+
+
+```{r}
+dn <- read.dna('cytb.nex.uniqueseq.phy')
+```
+
+```{r}
+m.dn <- round(dist.dna(dn, as.matrix = T, model = 'raw', pairwise.deletion = T), 4) %>% as_tibble(rownames = NA) %>% 
+  rownames_to_column("ID") %>% 
+  write_csv("cytb_distances_raw.csv")
+```
+
+I want to change all the names so that just the species is present.
+
+```{r}
+ # THis removes everything after first period
+m.dn2 <- gsub("^.*?\\.","", m.dn$ID ) %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column("ID")
+
+#after second period
+m.dn3 <- gsub("\\..*","",m.dn2$value) %>% 
+  as_tibble(rownames = NA) %>% 
+  mutate(value = recode(value, "cf" = "cf.neglecta"))
+
+#m.dn.g <- 
+  
+difs <- m.dn %>% bind_cols(m.dn3) %>% 
+  select(!ID) %>% 
+  gather("sample", "dif", -value) %>% 
+  mutate(sample = gsub("^.*?\\.","", sample )) %>% 
+  mutate(sample = gsub("\\..*","", sample )) %>%
+  mutate(sample = recode(sample, "cf" = "cf.neglecta")) %>% 
+  filter(sample %in% c('balingka', 'barapi', 'dewi', 'neglecta', 'cf_neglecta', 'hutanis', 'lepidura', 'monticola', 'umbra', 'abscondita', 'paradoxura', 'beccarii', 'maxi')) %>% 
+  filter(value %in% c('balingka', 'barapi', 'dewi', 'neglecta', 'cf_neglecta', 'hutanis', 'lepidura', 'monticola', 'umbra', 'abscondita', 'paradoxura', 'beccarii', 'maxi')) %>% 
+  unite(combo, value, sample, sep = "_", remove = FALSE) %>% 
+  select(!c(value, sample)) %>% 
+  group_by(combo) %>% 
+  summarise(mean = mean(dif),
+            min = min(dif),
+            max = max(dif)) %>% 
+  mutate_if(is.numeric, ~round(., 2)) %>% 
+  #mutate_at(c(2:3), ~replace(., is.na(.), 0)) %>% 
+  unite(range, min, max, sep = ",", remove = FALSE) %>% 
+  select(!c(min, max)) %>% 
+  unite(mean, mean, range, sep = " (", remove = FALSE) %>% 
+  select(!range) %>% 
+  separate(combo, into = c('a', 'b'), sep = '_')
+
+
+```
+
+# Get mean differences
+```{r}
+difs2 <- m.dn %>% bind_cols(m.dn3) %>% 
+  select(!ID) %>% 
+  gather("sample", "dif", -value) %>% 
+  mutate(sample = gsub("^.*?\\.","", sample )) %>% 
+  mutate(sample = gsub("\\..*","", sample )) %>%
+  mutate(sample = recode(sample, "cf" = "cf.neglecta")) %>% 
+  filter(sample %in% c('balingka', 'barapi', 'dewi', 'neglecta', 'cf_neglecta', 'hutanis', 'lepidura', 'monticola', 'umbra', 'abscondita', 'paradoxura', 'beccarii', 'maxi')) %>% 
+  filter(value %in% c('balingka', 'barapi', 'dewi', 'neglecta', 'cf_neglecta', 'hutanis', 'lepidura', 'monticola', 'umbra', 'abscondita', 'paradoxura', 'beccarii', 'maxi')) %>% 
+  unite(combo, value, sample, sep = "_", remove = FALSE) %>% 
+  select(!c(value, sample)) %>% 
+  group_by(combo) %>% 
+  summarise(mean = mean(dif)) %>% 
+  mutate_if(is.numeric, ~round(., 2)) %>% 
+  separate(combo, into = c('a', 'b'), sep = '_')
+
+mat <- xtabs(mean ~ a + b, difs2) %>% matrixcalc::upper.triangle() %>% as.data.frame.matrix()
+
+mat2 <- xtabs(mean ~ a + b, difs2)
+mat2[upper.tri(mat2)] <- ""
+mat2 <- mat2 %>% as.data.frame.matrix() %>% as_tibble(rownames = NA) %>% write.csv('distance_matrix_raw.csv')
+```
+
+# Print matrix
+I manually added the values and saved it as a csv called `distance_matrix_range.csv`
+
+```{r}
+
+d <- read_csv('distance_matrix_range_newline_raw.csv') %>% column_to_rownames(var = '...1')
+# make NAs into blanks
+d[is.na(d)] <- " "
+```
+
+```{r}
+#print table and save png
+d %>% kbl(caption = "Raw cytb Differences   mean (min, max)", longtable = T, escape = F, align = 'c') %>% 
+  kable_classic(#full_width = F, 
+               html_font = "Cambria", 
+               font_size = 10, 
+               position = 'center') %>% 
+ #column_spec(position = 'center')
+  save_kable(file = "cytb_differences_raw.png",zoom = 2)
+```
+
+# Print Matrix fewer species
+
+This matrix doesn't have the morphologically and phylogenetically distant paradoxura and abscondita or maxi (close to elongata)
+
+```{r}
+d <- read_csv('distance_matrix_range_no_para_abs.csv') %>% column_to_rownames(var = '...1')
+# make NAs into blanks
+d[is.na(d)] <- " "
+```
+
+```{r}
+#print table and save png
+d %>% kbl(caption = "cytb Jukes-Cantor Differences   mean (min, max)") %>% 
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 10) %>%
+  #as_image(width = 8, height = 5) %>% 
+  save_kable(file = "cytb_differences_reduced.png",zoom = 2)
+```
+
+
+# Sumatra Only
+
+```{r}
+d <- read_csv('distance_matrix_range_Sumatra.csv') %>% column_to_rownames(var = '...1')
+# make NAs into blanks
+d[is.na(d)] <- " "
+```
+
+```{r}
+#print table and save png
+d %>% kbl(caption = "uncorrected cytb Jukes-Cantor Differences   mean (min, max)") %>% 
+  kable_classic(full_width = F, html_font = "Cambria", font_size = 10) %>%
+  #as_image(width = 8, height = 5) %>% 
+  save_kable(file = "cytb_differences_Sumatra.png",zoom = 2)
+```

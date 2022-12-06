@@ -1,0 +1,195 @@
+---
+title: "Cranial Trait Modeling"
+output: html_notebook
+---
+
+Estimating the means of each cranial trait, conditioned on skull length. 
+
+```{r}
+pacman::p_load(tidyverse, brms, tidybayes, ggtext)
+
+scale2 <- function(x, na.rm = FALSE) (x - mean(x, na.rm = na.rm)) / sd(x, na.rm)
+
+
+db <- read_csv("Sumatra_DB.csv") %>% 
+  mutate(Catalog = as.character(Catalog),
+         HB = Total - Tail,
+         RTL = Tail / HB) %>%
+  mutate(Species = recode(Species, "utongensis" = "neglecta")) %>% 
+  rownames_to_column("id")
+
+# Mass measurement for ordering species in plots
+sp_ord <- db %>% 
+  group_by(Species) %>% 
+  filter(Species != "unknown",
+         Species != "NA",
+         !is.na(Mass)) %>% 
+  summarise(.,mean = mean(Mass)) %>% 
+  select(Species) %>% 
+  as.list()
+```
+
+
+```{r}
+db2 <- db %>% 
+  filter(Species != "unknown",
+         #!is.na(Condyloincisive) & !is.na(M2_M2_Labial),
+         Species %in% c('barapi', 'balingka', 'neglecta', 'paradoxura', 'beccarii', 'hutanis',  'lepidura', 'dewi')) %>% 
+  mutate_at(15:26, scale2, na.rm = TRUE)
+
+m0 <- brm(Condyloincisive ~  0 + Species, 
+          data = db2, 
+          refresh = 0)
+
+m1 <-  update(m0, M2_M2_Labial ~  0 + Species + Condyloincisive, 
+              newdata = db2, refresh = 0)
+
+m2 <- update(m1, Interorbit_Width ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m3 <- update(m1, Brain_Breadth ~  0 + Species + Condyloincisive,
+             newdata = db2, refresh = 0)
+
+m4 <- update(m1, Rostral_Length ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m5 <- update(m1, Rostral_Width ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m6 <- update(m1, P_palate_Depth ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m7 <- update(m1, P_palate_Length ~  0 + Species + Condyloincisive,
+             newdata = db2, refresh = 0)
+
+m8 <- update(m1, Condyle_Glenoid ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m9 <- update(m1, Upper_Tooth ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m10 <- update(m1, P4_M3 ~  0 + Species + Condyloincisive, 
+              newdata = db2, refresh = 0)
+
+m11 <- update(m1, Palate_Width  ~  0 + Species + Condyloincisive, 
+              newdata = db2, refresh = 0)
+```
+
+```{r}
+d <- bind_rows("Condyloincisive Length" = posterior_samples(m0),
+               "M<sup>2</sup>-M<sup>2</sup> Width" = posterior_samples(m1), 
+               "Interorbit Width" = posterior_samples(m2),
+               "Braincase Breadth" = posterior_samples(m3),
+               "Rostral Length" = posterior_samples(m4),
+               "Rostral Width" = posterior_samples(m5),
+               "Postpalate Depth" = posterior_samples(m6),
+               "Postpalate Length" = posterior_samples(m7),
+               "Condyle to Glenoid" = posterior_samples(m8),
+               "Upper Toothrow Length" = posterior_samples(m9),
+               "P<sup>4</sup>-M<sup>3</sup> Length" = posterior_samples(m10),
+               "Palate Width" = posterior_samples(m11),
+               .id = "var") %>% 
+  select(!c(lprior, lp__, b_Condyloincisive, sigma)) %>% 
+  rename_with(str_sub, start = 10L, .cols = starts_with("b_Species")) %>% 
+  #mutate_at(15:26, scale2, na.rm = TRUE) %>% 
+  pivot_longer(!var, names_to = "species", values_to = "val") %>% 
+  group_by(var) %>% 
+  mutate(val = scale2(val)) %>% ungroup() 
+
+d %>% 
+  ggplot(aes(x = fct_relevel(species, "neglecta", "balingka", "barapi", "beccarii", "paradoxura", "dewi", "hutanis", "lepidura"), y = val)) +
+  stat_pointinterval(.width = c(.60, .89), 
+                     point_size = 1.5) +
+  geom_hline(yintercept = 0, linetype = 3, size = 0.3) +
+  scale_y_continuous(labels = scales::label_number(accuracy = 0.1))+
+  facet_wrap(~fct_relevel(var,"Condyloincisive Length", "Braincase Breadth", "Condyle to Glenoid", "Interorbit Width", "Postpalate Depth", "Postpalate Length", "M<sup>2</sup>-M<sup>2</sup> Width", "Palate Width", "Rostral Length", "Rostral Width","P<sup>4</sup>-M<sup>3</sup> Length", "Upper Toothrow Length" ), 
+             scales = 'free', ncol = 4) + 
+  theme_bw() +
+  labs(y = "Measurement Estimate (Scaled)", x = "") +
+  theme(axis.text.x= element_text(angle=35,hjust=1, face = "italic"),
+        strip.background = element_blank(),
+        strip.text =  element_markdown(size = 10)) 
+
+ggsave("model_facet.pdf", width = 9.2, height = 7)
+```
+
+## No scaling
+```{r}
+db2 <- db %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(M2_M2_Labial),
+         Species %in% c('barapi', 'balingka', 'neglecta', 'paradoxura', 'beccarii', 'hutanis',  'lepidura', 'dewi')) %>% 
+  mutate_at(15, scale2, na.rm = TRUE)
+
+m0 <- brm(Condyloincisive ~  0 + Species, 
+          data = db2, 
+          refresh = 0)
+
+m1 <-  update(m0, M2_M2_Labial ~  0 + Species + Condyloincisive, 
+              newdata = db2, refresh = 0)
+
+m2 <- update(m1, Interorbit_Width ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m3 <- update(m1, Brain_Breadth ~  0 + Species + Condyloincisive,
+             newdata = db2, refresh = 0)
+
+m4 <- update(m1, Rostral_Length ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m5 <- update(m1, Rostral_Width ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m6 <- update(m1, P_palate_Depth ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m7 <- update(m1, P_palate_Length ~  0 + Species + Condyloincisive,
+             newdata = db2, refresh = 0)
+
+m8 <- update(m1, Condyle_Glenoid ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m9 <- update(m1, Upper_Tooth ~  0 + Species + Condyloincisive, 
+             newdata = db2, refresh = 0)
+
+m10 <- update(m1, P4_M3 ~  0 + Species + Condyloincisive, 
+              newdata = db2, refresh = 0)
+
+m11 <- update(m1, Palate_Width  ~  0 + Species + Condyloincisive, 
+              newdata = db2, refresh = 0)
+```
+
+
+
+```{r}
+d <- bind_rows("Condyloincisive Length" = posterior_samples(m0),
+               "M<sup>2</sup>-M<sup>2</sup> Width" = posterior_samples(m1), 
+               "Interorbit Width" = posterior_samples(m2),
+               "Braincase Breadth" = posterior_samples(m3),
+               "Rostral Length" = posterior_samples(m4),
+               "Rostral Width" = posterior_samples(m5),
+               "Postpalate Depth" = posterior_samples(m6),
+               "Postpalate Length" = posterior_samples(m7),
+               "Condyle to Glenoid" = posterior_samples(m8),
+               "Upper Toothrow Length" = posterior_samples(m9),
+               "P<sup>4</sup>-M<sup>3</sup> Length" = posterior_samples(m10),
+               "Palate Width" = posterior_samples(m11),
+               .id = "var") %>% 
+  select(!c(lprior, lp__, b_Condyloincisive, sigma)) %>% 
+  rename_with(str_sub, start = 10L, .cols = starts_with("b_Species")) %>% 
+  pivot_longer(!var, names_to = "species", values_to = "val")
+
+d %>% 
+  ggplot(aes(x = fct_relevel(species, "neglecta", "balingka", "barapi", "beccarii", "paradoxura", "dewi", "hutanis", "lepidura"), y = val)) +
+  stat_pointinterval(.width = c(.60, .89), 
+                     point_size = 1.5) +
+  facet_wrap(~fct_relevel(var,"Condyloincisive Length", "Braincase Breadth", "Condyle to Glenoid", "Interorbit Width", "Postpalate Depth", "Postpalate Length", "M<sup>2</sup>-M<sup>2</sup> Width", "Palate Width", "Rostral Length", "Rostral Width","P<sup>4</sup>-M<sup>3</sup> Length", "Upper Toothrow Length" ), 
+             scales = 'free', ncol = 4) + 
+  theme_bw() +
+  labs(y = "Measurement Estimate (Scaled)", x = "") +
+  theme(axis.text.x= element_text(angle=35,hjust=1, face = "italic"),
+        strip.background = element_blank(),
+        strip.text =  element_markdown(size = 10)) 
+
+ggsave("model_facet_no_scaling.pdf", width = 9.2, height = 7)
+```

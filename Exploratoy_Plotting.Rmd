@@ -1,0 +1,417 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+Try some plotting!
+Looking for differences in Sumatra shrews.
+
+Below is a bunch of preliminary plotting using some confusing speciemns that I can't identify.
+Now the new functional database is complete
+```{r}
+pacman::p_load(tidyverse, patchwork, kableExtra)
+```
+# Read Data
+
+```{r}
+db <- read_csv("Sumatra_DB.csv") %>% 
+  mutate(Catalog = as.character(Catalog),
+         HB = Total - Tail,
+         RTL = Tail / HB) %>%
+  rownames_to_column("id")
+
+# Mass measurement for ordering species in plots
+sp_ord <- db %>% 
+  group_by(Sp2) %>% 
+  filter(Sp2 != "unknown",
+         Sp2 != "NA",
+         !is.na(Mass)) %>% 
+  summarise(.,mean = mean(Mass)) %>% 
+  select(Sp2) %>% 
+  as.list()
+```
+### Tables
+```{r}
+qtab <- function(metric) {
+db %>% 
+    #filter(Locality == "Talamau") %>%
+    filter(Sp2 != "unknown") %>%
+    mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta")) %>%
+    mutate(RSW = Condyloincisive / Brain_Breadth) %>%
+    mutate(RRW = Rostral_Length / Rostral_Width) %>%
+    mutate(IL = Upper_Tooth - P4_M3,
+           IC = Interorbit_Width / Condyloincisive,
+           SMW = Interorbit_Width / M2_M2_Labial) %>%
+   #filter(Sp2 %in% c("dewi", "hutanis", "lepidura"), !is.na({{metric}})) %>%
+   filter(Sp2 %in% c("barapi", "neglecta", "balingka"), !is.na({{metric}})) %>%
+  select(Sp2, {{metric}}) %>% 
+  group_by(Sp2) %>% 
+  summarise(min({{metric}}),
+            max({{metric}}),
+            mean({{metric}}),
+            sd({{metric}})) %>% 
+    mutate_if(is.numeric, ~round(., 2))
+    #add_column(metric = print({{metric}})) #%>% 
+  #select(order(colnames(.))) %>% 
+  #arrange(Condyloincisive) %>% 
+   #kbl(digits = 2) %>%
+  #kable_classic(full_width = F, html_font = "Cambria")
+}
+```
+# Quick Table function
+```{r}
+qtab(HF) 
+```
+
+```{r}
+qtab(Interorbit_Width)
+```
+
+# Skull Proportions
+##Box plots
+```{r}
+hull_clade <- db %>% 
+  filter(Sp2 != "unknown",
+         !is.na(Brain_Breadth) & 
+           !is.na(HB) &
+           !is.na(Condyloincisive)) %>% 
+  mutate(r_sk = Condyloincisive / Brain_Breadth) %>% 
+  group_by(Sp2) %>% 
+  slice(chull(HB, r_sk))
+
+ db %>% 
+  filter(Sp2 != "unknown",
+         !is.na(Brain_Breadth) & 
+           !is.na(Condyloincisive) &
+           !is.na(HB)
+         ) %>%
+  mutate(r_sk = Condyloincisive / Brain_Breadth) %>% 
+  mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(x = HB,  y = r_sk, color = Sp2, fill = Sp2, shape = Sp2)) +
+  geom_point(size = 3, stroke = 1)  +
+  geom_polygon(data = hull_clade, alpha = 0.5) +
+  scale_shape_manual(values = rep(1:10, 5)) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_bw()
+```
+
+RObusticity
+
+
+```{r}
+ db %>% 
+  filter(Sp2 != "unknown",
+         !is.na(Brain_Breadth) & !is.na(Condyloincisive)
+         ) %>%
+  mutate(r_sk = Condyloincisive / Brain_Breadth) %>% 
+  mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(y = r_sk, x=reorder(Sp2,Mass, na.rm = TRUE),color = Sp2, fill = Sp2)) +
+  geom_boxplot(alpha = 0.5) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_bw() + 
+  scale_x_discrete(guide = guide_axis(n.dodge = 2))
+```
+
+
+#### Rostrum Length vs Upper_Tooth
+```{r}
+hull_clade <- db %>% 
+  filter(Sp2 != "unknown",
+         !is.na(Rostral_Length) & 
+           !is.na(Upper_Tooth)) %>% 
+  group_by(Sp2) %>% 
+  slice(chull(Rostral_Length, Upper_Tooth))
+
+ db %>% 
+  filter(Sp2 != "unknown",
+         !is.na(Rostral_Length) & 
+           !is.na(Upper_Tooth)) %>% 
+  mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(x = Rostral_Length,  y = Upper_Tooth, color = Sp2, fill = Sp2, shape = Sp2)) +
+  geom_point(size = 3, stroke = 1)  +
+  geom_polygon(data = hull_clade, alpha = 0.5) +
+  scale_shape_manual(values = rep(1:10, 5)) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_bw()
+```
+
+```{r}
+db %>% 
+  filter(Sp2 %in% c("barapi","balingka")) %>% 
+  select(Sp2, Upper_Tooth, Rostral_Length, Interorbit_Width, M2_M2_Labial) %>% 
+  arrange(Sp2, M2_M2_Labial) %>% 
+   kbl(digits = 2) %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+```
+
+#### Rostrum width
+```{r}
+hull_clade <- db %>% 
+  filter(Sp2 != "unknown",
+         !is.na(Rostral_Length) & 
+           !is.na(Rostral_Width)) %>% 
+  group_by(Sp2) %>% 
+  slice(chull(Rostral_Length, Rostral_Width))
+
+ db %>% 
+  filter(Sp2 != "unknown",
+         !is.na(Rostral_Length) & 
+           !is.na(Rostral_Width)) %>% 
+  mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(x = Rostral_Length,  y = Rostral_Width, color = Sp2, fill = Sp2, shape = Sp2)) +
+  geom_point(size = 3, stroke = 1)  +
+  geom_polygon(data = hull_clade, alpha = 0.5) +
+  scale_shape_manual(values = rep(1:10, 5)) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_bw()
+ 
+ 
+  db %>% 
+  filter(Sp2 != "unknown",
+         !is.na(Rostral_Length) & !is.na(Rostral_Width)
+         ) %>%
+  mutate(Rostral_Shape = Rostral_Length / Rostral_Width) %>% 
+  mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(x=reorder(Sp2,Mass, na.rm = TRUE), y = Rostral_Shape, color = Sp2, fill = Sp2)) +
+  geom_boxplot(alpha = 0.5, outlier.shape = NA) +
+  geom_jitter(shape=16, position=position_jitter(0.2), alpha = 0.7)  +
+  #geom_polygon(data = hull_clade, alpha = 0.5) +
+  #scale_shape_manual(values = rep(1:10, 5)) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_bw() + 
+  scale_x_discrete(guide = guide_axis(n.dodge = 2))
+```
+
+
+# Hutanis Problem 1
+### What is hutanis? What is beccarii?
+
+PLots of Ruedi external limits vs. our reality
+```{r}
+db %>% 
+  filter(Island == "Sumatra",
+         Species != "unknown",
+         Species %in% c("beccarii","hutanis", "lepidura"),
+         #Locality == "Singgalang"
+         Locality %in% c('Singgalang', 'Talamau', 'Tujuh') 
+         ) %>%
+  mutate(Species = recode(Species, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(y = Tail, x = HB, color = Species, shape = Locality)) +
+  geom_point(size = 3, alpha = 0.85) + 
+  geom_segment(aes(x = 73, y = 40, xend = 73, yend = 61), color = 'black', linetype = "dashed", size = 0.3) +
+  #geom_segment(aes(x = 4, y = 15, xend = 4, yend = 27)) + 
+  #geom_segment(aes(x = 4, y = 15, xend = 4, yend = 27)) +
+  geom_vline(xintercept = 86.5, linetype = "dashed") +
+  geom_hline(yintercept = 61, linetype = "dashed") + 
+  scale_color_brewer(palette = 'Dark2', 
+                     name = "mtDNA 'Species'") +
+  annotate(geom="text", x=67, y=58, label="beccarii") +
+  annotate(geom="text", x=81, y=58, label="hutanis") +
+  annotate(geom="text", x=100, y=65, label="lepidura") +
+  coord_cartesian(ylim = c(45, 80)) +
+  labs(title = "Ruedi Measurement Scheme", subtitle = "Colors represent mtDNA clusters. \nLines represent the morphological boundaries described by Ruedi. \nnDNA provides no resolution, all are jumbled together and mixed with vosmaeri") +
+  theme_classic()
+ggsave("Ruedi_Morpho_CytB_plot.pdf", height = 5, width = 7)
+```
+
+
+```{r}
+db %>% 
+  filter(Island == "Sumatra",
+         Species != "unknown",
+         Species %in% c("beccarii","hutanis", "lepidura"),
+         #Locality == "Singgalang"
+         ) %>%
+  mutate(Species = recode(Species, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(y = HF, x = HB, color = Species)) +
+  geom_point(size = 3) + 
+  geom_vline(xintercept = 73, linetype = "dashed") +
+  geom_vline(xintercept = 86.5, linetype = "dashed") +
+  geom_hline(yintercept = 16, linetype = "dashed") +
+  geom_hline(yintercept = 13.1, linetype = "dashed") +
+  annotate(geom="text", x=62, y=12.5, label="beccarii") +
+  annotate(geom="text", x=80, y=15, label="hutanis") +
+  annotate(geom="text", x=100, y=17, label="lepidura") +
+  labs(title = "Ruedi Measurement Scheme", subtitle = "Colors represent mtDNA clusters.\nnDNA provides no resolution, all jumbled and mixed with vosmaeri") +
+  theme_bw()
+#ggsave("bec-hut-lep-HB-HF.pdf")
+```
+As can be seen in both of these, the measurements laid out by Ruedi don't make sense.
+
+We can rename the species based on Ruedi, then see how well things fit.
+```{r}
+db %>% 
+  mutate(Species = Sp2) %>% 
+  mutate(Species = case_when(Species == "hutanis"  & HB   < 73 ~ "beccarii",
+                             Species == "beccarii" & HB   > 73 ~ "hutanis",
+                             Species == "hutanis"  & Tail > 62 ~ "lepidura",
+                             Species == "unknown"  ~ "unknown",
+                             TRUE ~ Species)) %>% 
+  filter(Island == "Sumatra",
+         #Species != "unknown",
+         Species %in% c("beccarii","hutanis", "lepidura", "unknown"),
+         #Locality == "Singgalang"
+         ) %>%
+  mutate(Species = recode(Species, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(y = Tail, x = HB, color = Species)) +
+  geom_point(size = 3) + 
+  geom_vline(xintercept = 73, linetype = "dashed") +
+  geom_vline(xintercept = 86.5, linetype = "dashed") +
+  geom_hline(yintercept = 61, linetype = "dashed") + 
+  annotate(geom="text", x=62, y=58, label="beccarii") +
+  annotate(geom="text", x=80, y=58, label="hutanis") +
+  annotate(geom="text", x=100, y=65, label="lepidura") +
+  labs(title = "Ruedi Measurement Scheme", subtitle = "Colors represent morphological clusters") +
+  theme_bw()
+```
+
+```{r}
+db %>% 
+  mutate(Species = Species) %>% 
+  mutate(Species = case_when(Species == "hutanis"  & HB   < 73 ~ "beccarii",
+                             Species == "beccarii" & HB   > 73 ~ "hutanis",
+                             Species == "hutanis"  & Tail > 62 ~ "lepidura",
+                             TRUE ~ Species)) %>% 
+  filter(Island == "Sumatra",
+         Species != "unknown",
+         Species %in% c("beccarii","hutanis", "lepidura"),
+         #Locality == "Singgalang"
+         ) %>%
+  mutate(Species = recode(Species, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(y = HF, x = HB, color = Species)) +
+  geom_point(size = 3) + 
+  geom_vline(xintercept = 73, linetype = "dashed") +
+  geom_vline(xintercept = 86.5, linetype = "dashed") +
+  geom_hline(yintercept = 16, linetype = "dashed") +
+  geom_hline(yintercept = 13.1, linetype = "dashed") +
+  annotate(geom="text", x=62, y=12.5, label="beccarii") +
+  annotate(geom="text", x=80, y=15, label="hutanis") +
+  annotate(geom="text", x=100, y=17, label="lepidura") +
+  labs(title = "Ruedi Measurement Scheme", subtitle = "Colors represent morpho clusters") +
+  theme_bw()
+```
+
+```{r}
+#db %>% filter(Island == "Sumatra") %>% 
+#  write_csv("Sumatra_DB.csv")
+```
+
+
+
+
+
+
+
+```{r}
+db %>% 
+  mutate(Species = recode(Species, "utongensis" = "neglecta")) %>%
+  filter(#Island == "Sumatra",
+         #Species != "unknown"
+         Species %in% c("barapi", "balingka", "neglecta")
+         ) %>% 
+  ggplot(aes(y = Condyloincisive, x = Species, color = Species)) +
+  geom_violin() +
+    geom_point() + 
+  theme_bw()
+```
+
+```{r}
+#options(digits = 2)
+db %>% 
+  filter(Island == "Sumatra",
+         Sp2 != "unknown"#,
+         #Locality == "Singgalang"
+         ) %>% 
+  mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta")) %>%
+  group_by(Sp2) %>% 
+  summarise(RTL = mean(Tail/HB, na.rm = TRUE),
+            sd = sd(Tail/HB, na.rm = TRUE)) %>% 
+  as_tibble()
+```
+```{r}
+ db %>% 
+  filter(Sp2 != "unknown"#,
+         #!is.na(Brain_Breadth) & !is.na(Condyloincisive)
+         ) %>%
+  mutate(RTL = Tail/HB) %>% 
+  mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta")) %>% 
+  ggplot(aes(y = RTL, x=reorder(Sp2,Mass, na.rm = TRUE),color = Sp2, fill = Sp2)) +
+  geom_boxplot(alpha = 0.5) +
+  #geom_point(size = 3, stroke = 1)  +
+  #geom_polygon(data = hull_clade, alpha = 0.5) +
+  #scale_shape_manual(values = rep(1:10, 5)) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_bw() + 
+  scale_x_discrete(guide = guide_axis(n.dodge = 2))
+```
+
+
+# Generate mean and sd csv files
+```{r}
+#options(digits = 2)
+db %>% 
+  filter(
+         Island == "Sumatra",
+         Species != "unknown",
+         #Locality == "Singgalang"
+         ) %>% 
+  mutate(Species = recode(Sp2, "utongensis" = "neglecta"),
+         RTL = Tail / HB) %>%
+  group_by(Sp2) %>% 
+  summarise_if(is.numeric,  list(mean = mean, sd = sd), na.rm = TRUE) %>% 
+  select(order(colnames(.))) %>%
+  select(Sp2, everything()) %>% 
+  write_csv("means_sds.csv")
+
+db %>% 
+  filter(
+         Island == "Sumatra",
+         Species != "unknown",
+         Locality == "Talamau"
+         ) %>% 
+  mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta"),
+         RTL = Tail / HB) %>%
+  group_by(Sp2) %>% 
+  summarise_if(is.numeric,  list(mean = mean, sd = sd), na.rm = TRUE) %>% 
+  select(order(colnames(.))) %>% 
+  write_csv("means_sds_Talamau.csv")
+
+db %>% 
+  filter(
+         Island == "Sumatra",
+         Species != "unknown",
+         Locality == "Singgalang"
+         ) %>% 
+  mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta"),
+         RTL = Tail / HB) %>%
+  group_by(Sp2) %>% 
+  summarise_if(is.numeric,  list(mean = mean, sd = sd), na.rm = TRUE) %>% 
+  select(order(colnames(.))) %>% 
+  write_csv("means_sds_Singgalang.csv")
+```
+
+# Body size and elevation
+
+```{r}
+db %>% 
+  filter(
+         Island == "Sumatra",
+         Species  %in% c("beccarii", "hutanis", "lepidura"),
+         Locality == "Talamau"
+         ) %>% 
+  ggplot(aes(y = Elevation, x = Mass)) + 
+  geom_point(size = 3, stroke = 1) +
+    theme_bw() +
+    theme(legend.text = element_text(face = "italic")) +
+   labs(
+    y = "Elevation",
+    x = "Mass"
+  ) + ggtitle('Talamau hutanis/beccarii/lepidura, mass x elevation')
+
+```
+

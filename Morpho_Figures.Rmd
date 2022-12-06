@@ -1,0 +1,345 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Plotting For Manuscript
+
+The preliminary plots are in `Exploratory_Plotting.Rmd`. Based on these results, there are 4 plots that I really want to include: Linear PC1&2, Dorsal PC1&2, Ventral PC1&2, and the Condyloincisive x Tail plot. 
+```{r}
+pacman::p_load(tidyverse, patchwork, brms, bayesplot, tidybayes)
+scale2 <- function(x, na.rm = FALSE) (x - mean(x, na.rm = na.rm)) / sd(x, na.rm)
+```
+# Read Data
+
+```{r}
+db <- read_csv("Sumatra_DB.csv") %>% 
+  mutate(Catalog = as.character(Catalog),
+         HB = Total - Tail,
+         RTL = Tail / HB) %>%
+  mutate(Species = recode(Species, "utongensis" = "neglecta")) %>% 
+  rownames_to_column("id")
+
+# Make a spreadsheet for the Sup Table
+
+db %>% 
+  select(Museum, 
+         Catalog, 
+         Species, 
+         Condyloincisive:HB, 
+         Sex, 
+         Elevation, 
+         Locality, 
+         LPC1:LPC12, 
+         DPCA1:VCsize) %>%
+  rename_with(~str_replace(., 'LPC', 'Linear_PC')) %>% 
+  rename_with(~str_replace(., 'DPCA', 'Dorsal_PC')) %>% 
+  rename_with(~str_replace(., 'VPCA', 'Ventral_PC')) %>%
+  rename_with(~str_replace(., 'DCsize', 'Dorsal_Centroid_Size')) %>%
+  rename_with(~str_replace(., 'VCsize', 'Ventral_Centroid_Size')) %>%
+  rename_with(~str_replace(., 'HF', 'Hind_Foot')) %>%
+  rename_with(~str_replace(., 'HB', 'Head_Body')) %>%
+  write_csv("Appendix_2_Supporting_Table_Specimen_Data.csv")
+# Mass measurement for ordering species in plots
+sp_ord <- db %>% 
+  group_by(Species) %>% 
+  filter(Species != "unknown",
+         Species != "NA",
+         !is.na(Mass)) %>% 
+  summarise(.,mean = mean(Mass)) %>% 
+  select(Species) %>% 
+  as.list()
+```
+
+## Set Layers for repeated use
+First time trying this
+It's tricky, so I am just using the original full text plots
+```{r}
+lays = list(
+  #geom_vline(xintercept = 0, linetype = 3, size = 0.25),
+    #geom_hline(yintercept = 0, linetype = 3, size = 0.25),
+    geom_point(size = 3, stroke = 1),
+    scale_shape_manual(values = rep(1:10, 5), name = "Species"),
+    scale_fill_brewer(palette = "Dark2", name = "Species"),
+    scale_color_brewer(palette = "Dark2", name = "Species"),
+    theme_bw(),
+    theme(legend.text = element_text(face = "italic", size = 12))
+  )
+```
+
+
+## Linear PC Plot
+
+Plot PCA 1 & 2
+```{r}
+hull_clade <- db %>% 
+  filter(Species != "unknown",
+         !is.na(LPC1) & !is.na(LPC2)) %>% 
+  group_by(Species) %>% 
+  slice(chull(LPC1, LPC2))
+  
+p1 <- db %>% 
+  filter(Species != "unknown",
+         !is.na(LPC1) & !is.na(LPC2)
+         ) %>%
+  ggplot(aes(x = LPC1, y = LPC2, color = Species, fill = Species, shape = Species)) +
+  geom_polygon(data = hull_clade, alpha = 0.4) +
+  geom_point(size = 3, stroke = 1) +
+    scale_shape_manual(values = rep(1:10, 5), name = "Species") +
+    scale_fill_brewer(palette = "Dark2", name = "Species") +
+    scale_color_brewer(palette = "Dark2", name = "Species") +
+    theme_bw() +
+    theme(legend.text = element_text(face = "italic", size = 12)) +
+   labs(
+    x = "Linear PC1 (91%)",
+    y = "Linear PC2 (3%)"
+  )
+```
+
+## Dorsal PC Plot
+
+```{r}
+hull_clade <- db %>% 
+  filter(Species != "unknown",
+         !is.na(DPCA1) & !is.na(DPCA2)) %>% 
+  group_by(Species) %>% 
+  slice(chull(DPCA1, DPCA2))
+  
+p2 <- db %>% 
+  filter(Species != "unknown",
+         !is.na(DPCA1) & !is.na(DPCA2)
+         ) %>%
+  ggplot(aes(x = DPCA1, y = DPCA2, color = Species, fill = Species, shape = Species)) +
+  geom_polygon(data = hull_clade, alpha = 0.4) +
+  geom_point(size = 3, stroke = 1) +
+    scale_shape_manual(values = rep(1:10, 5), name = "Species") +
+    scale_fill_brewer(palette = "Dark2", name = "Species") +
+    scale_color_brewer(palette = "Dark2", name = "Species") +
+    theme_bw() +
+    theme(legend.text = element_text(face = "italic", size = 12)) +
+   labs(
+    x = "Dorsal PC1 (38%)",
+    y = "Dorsal PC2 (14%)"
+  )
+```
+
+## Ventral PC Plot
+
+```{r}
+hull_clade <- db %>% 
+  filter(Species != "unknown",
+         !is.na(VPCA1) & !is.na(VPCA2)) %>% 
+  group_by(Species) %>% 
+  slice(chull(VPCA1, VPCA2))
+  
+p3 <- db %>% 
+  filter(Species != "unknown",
+         !is.na(VPCA1) & !is.na(VPCA2)
+         ) %>%
+  ggplot(aes(x = VPCA1, y = VPCA2, color = Species, fill = Species, shape = Species)) +
+  geom_polygon(data = hull_clade, alpha = 0.4) +
+  geom_point(size = 3, stroke = 1) +
+    scale_shape_manual(values = rep(1:10, 5), name = "Species") +
+    scale_fill_brewer(palette = "Dark2", name = "Species") +
+    scale_color_brewer(palette = "Dark2", name = "Species") +
+    theme_bw() +
+    theme(legend.text = element_text(face = "italic", size = 12)) +
+   labs(
+    x = "Ventral PC1 (35%)",
+    y = "Ventral PC2 (11%)"
+  )
+```
+
+## CI and Tail
+Condyloincisive and Tail is a very nice bivariate plot. This does not need the 0-0 lines, so I am not using the `lays`
+
+Geom_smooth doesn't go to the edge, so I am using abline
+
+```{r}
+dd <- db %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(Tail),
+         Species != "paradoxura"
+         ) 
+lm(Condyloincisive ~ Tail, dd)
+```
+
+```{r}
+hull_clade <- db %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(Tail)) %>% 
+  group_by(Species) %>% 
+  slice(chull(Condyloincisive, Tail))
+  
+p4 <-  db %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(Tail)
+         ) %>%
+  ggplot(aes(y = Condyloincisive, x = Tail, color = Species, fill = Species, shape = Species)) + 
+  geom_abline(slope =  0.2423 , 
+              intercept = 6.7275, 
+              color="black", 
+              size=0.3, 
+              linetype = 5) +
+  geom_polygon(data = hull_clade, alpha = 0.4) +
+  geom_point(size = 3, stroke = 1) +
+    scale_shape_manual(values = rep(1:10, 5), name = "Species") +
+    scale_fill_brewer(palette = "Dark2", name = "Species") +
+    scale_color_brewer(palette = "Dark2", name = "Species") +
+    theme_bw() +
+    theme(legend.text = element_text(face = "italic", size = 12)) +
+   labs(
+    y = "Condyloincisive Length (mm)",
+    x = "Tail Length (mm)"
+  ) + xlim(33,78) #+
+   #coord_cartesian(xlim = c(33, 78))
+p4
+```
+
+## CI and Tail 2
+Using Paradoxura, but not using the regression line. 
+```{r}
+dd <- db %>% 
+  mutate(ltail = log(Tail)) 
+```
+
+```{r}
+hull_clade <- dd %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(ltail)) %>% 
+  group_by(Species) %>% 
+  slice(chull(Condyloincisive, ltail))
+  
+p4 <-  dd %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(ltail)
+         ) %>%
+  ggplot(aes(y = Condyloincisive, x = ltail, color = Species, fill = Species, shape = Species)) + 
+  #geom_abline(slope =  0.2423 , 
+  #            intercept = 6.7275, 
+  #            color="black", 
+  #            size=0.3, 
+  #            linetype = 5) +
+  geom_polygon(data = hull_clade, alpha = 0.4) +
+  geom_point(size = 3, stroke = 1) +
+    scale_shape_manual(values = rep(1:10, 5), name = "Species") +
+    scale_fill_brewer(palette = "Dark2", name = "Species") +
+    scale_color_brewer(palette = "Dark2", name = "Species") +
+    theme_bw() +
+    theme(legend.text = element_text(face = "italic", size = 12)) +
+   labs(
+    y = "Condyloincisive Length (mm)",
+    x = "log(Tail Length (mm))"
+  ) #+ xlim(33,78) #+
+   #coord_cartesian(xlim = c(33, 78))
+p4
+```
+# Big Plot
+
+Linear Measurements on top?
+
+```{r}
+( p1 | p4) / (p2 | p3) + plot_layout(guides = "collect") + plot_annotation(tag_levels = 'A') 
+ggsave('Morpho_Figure.pdf', height = 9.2, width = 11)
+```
+
+
+
+
+# Skull Length vs Skull Width
+```{r}
+
+hull_clade <- db %>% 
+  mutate(Rostral_Width = log(Rostral_Width)) %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(Rostral_Width)) %>% 
+  group_by(Species) %>% 
+  slice(chull(Condyloincisive, Rostral_Width))
+  
+p4 <-  db %>% 
+  mutate(Rostral_Width = log(Rostral_Width)) %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(Rostral_Width)
+         ) %>%
+  ggplot(aes(y = Condyloincisive, x = Rostral_Width, color = Species, fill = Species, shape = Species)) + 
+  geom_polygon(data = hull_clade, alpha = 0.4) +
+  geom_point(size = 3, stroke = 1) +
+    scale_shape_manual(values = rep(1:10, 5), name = "Species") +
+    scale_fill_brewer(palette = "Dark2", name = "Species") +
+    scale_color_brewer(palette = "Dark2", name = "Species") +
+    theme_bw() +
+    theme(legend.text = element_text(face = "italic", size = 12)) +
+   labs(
+    y = "Condyloincisive Length",
+    x = "Rostral_Width Length"
+  ) 
+
+p4
+```
+
+
+
+# RTL or TAIL?
+
+```{r}
+hull_clade <- db %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(RTL)) %>% 
+  group_by(Species) %>% 
+  slice(chull(Condyloincisive, RTL))
+  
+p5 <-  db %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(RTL)
+         ) %>%
+  ggplot(aes(y = Condyloincisive, x = RTL, color = Species, fill = Species, shape = Species)) + 
+  geom_polygon(data = hull_clade, alpha = 0.4) +
+  geom_point(size = 3, stroke = 1) +
+    scale_shape_manual(values = rep(1:10, 5), name = "Species") +
+    scale_fill_brewer(palette = "Dark2", name = "Species") +
+    scale_color_brewer(palette = "Dark2", name = "Species") +
+    theme_bw() +
+    theme(legend.text = element_text(face = "italic", size = 12)) +
+   labs(
+    y = "Condyloincisive Length",
+    x = "R Tail Length"
+  ) + xlim(0.5, 1)
+```
+ 
+
+```{r}
+p4 / p5 + plot_layout(guides = "collect") 
+```
+
+
+## m2m2 labial
+```{r}
+hull_clade <- db %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(M2_M2_Labial)) %>% 
+  mutate(Condyloincisive = scale2(Condyloincisive),
+         M2_M2_Labial = scale2(M2_M2_Labial)) %>% 
+  group_by(Species) %>% 
+  slice(chull(Condyloincisive, M2_M2_Labial))
+  
+p5 <-  db %>% 
+  filter(Species != "unknown",
+         !is.na(Condyloincisive) & !is.na(M2_M2_Labial)
+         ) %>%
+    mutate(Condyloincisive = scale2(Condyloincisive),
+         M2_M2_Labial = scale2(M2_M2_Labial)) %>% 
+  ggplot(aes(y = Condyloincisive, x = M2_M2_Labial, color = Species, fill = Species, shape = Species)) + 
+  geom_polygon(data = hull_clade, alpha = 0.4) +
+  geom_point(size = 3, stroke = 1) +
+    scale_shape_manual(values = rep(1:10, 5), name = "Species") +
+    scale_fill_brewer(palette = "Dark2", name = "Species") +
+    scale_color_brewer(palette = "Dark2", name = "Species") +
+    theme_bw() +
+  geom_abline(slope = 1, intercept = 0) +
+    theme(legend.text = element_text(face = "italic", size = 12)) +
+   labs(
+    y = "Condyloincisive Length",
+    x = "M2_M2_Labial"
+  ) #+ xlim(0.5, 1)
+p5
+```

@@ -1,0 +1,233 @@
+---
+title: "2D Landmarks on Crocidura Skulls"
+author: "Jon Nations"
+date: "10/22/2020"
+output:
+  html_notebook: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+This Markdown file walks through the operations of preparing pictures, placing landmarks, and saving data.
+
+All data is stored in the box drive found here:
+https://lsu.box.com/s/wdxa84uxe65itjh9szjcgnypjjkufwlc
+However you should all be connected to it.
+
+Selected Box directories can be synced to your computer so that you can use finder to access them rather than the Box online. Ask Jon if you need help. 
+
+# Preparing Photos
+
+The photos are stored in the "all_photos" folder. They are taken from the individual "batches" folders
+
+**1) Rename Photos in "all_photos" folder**
+
+The photos are currently named with a camera naming system. We want to name them after the specimens.
+Open the `data.xls` file in the GeoMorphPhotos folder. Note: there are 2 pages in this excel file.
+
+Then, in the Box website, open the `all_photos` directory and sort the photos by name by clicking the "Name" in the top of the list of files.
+ You can see that each specimen has 4 photos taken, two dorsal (top of skull) and two ventral (bottom of skull)
+As we work through the photos, we want to rename them with the collector number, catalog number, shot angle, then 1 or 2
+
+For example, photo `DSCF1141.JPG` (the first taken) corresponds to Collector number HH (for Heru Handika) 1357, catalog number is 39833, and it's dorsal shot number 1, so the new name is:
+`D_1_HH_1357_39833.jpg`
+
+Specimens collected by Jonathan A Nations are `JAN` and Jacob A Esselstyn are `JAE`.
+
+
+**2) Decide which of the two shots is best**
+
+There are 2 ventral and 2 dorsal shots for each skull. We want the clearest photo, and the highest contrast photo. We need to be able to see lots of little pieces on the skull. It will make more sense as we go along. 
+
+**3) Download the best renamed photo to your computer**
+
+Dowload whichever one you think is best, then open it in your computer using Preview
+
+**3) Edit, Crop and add scale bar**
+
+In many of the early photos, the ruler scale bar is far from the specimen. We need to make a scale bar close to the skull. In preview hit the little marker thing in the top right, In the shape dropdown (under shapes)a box with a triangle and a square), pick the line. A black line will appear. Change the color to red, then move it down to the ruler, and make it exactly **5 mm** long like this picture.
+
+I think it's best if the left end of the line hits the left edge of the black mm mark, and the right end hits the left edge of the other black mm mark.
+
+![Make Red Line](/Users/Dicrostonyx/Documents/Projects/Soricidae/Shrew_Phylogenetics/Sunda_Shrew_Landmark/shot_1.png)
+
+Then move the 5mm line up close to the skull like this
+
+![Move Red Line Close To Skull](/Users/Dicrostonyx/Documents/Projects/Soricidae/Shrew_Phylogenetics/Sunda_Shrew_Landmark/Shot_2.png)
+
+You also may want to adjst the color, contrast, or sharpness of the picture. These options are in the edit window. Click the Pyramid button to the right of the shape button in the toolbar to access this. The color of the picture does not matter, so if it's most clear as black and white (which is often the case), go ahead and lower the saturation all the way. I like to turn up the sharpness, lower the saturation, turn down the shadows, and turn down the highlights, but every picture is different. 
+
+Then crop the picture CLOSE to the skull, keeping the line in the view. 
+
+![Close Crop](/Users/Dicrostonyx/Documents/Projects/Soricidae/Shrew_Phylogenetics/Sunda_Shrew_Landmark/Shot_3.png)
+
+It should look like this
+![Close Crop](/Users/Dicrostonyx/Documents/Projects/Soricidae/Shrew_Phylogenetics/Sunda_Shrew_Landmark/Shot_4.png)
+
+Then save the photo to a special folder on your computer. 
+
+**4) Upload Cropped photo**
+
+Upload to the Sunda-shrew-taxonomy -> GeoMorpPhotos -> cropped_photos folder in Box.
+
+Also keep the version on your computer for now.
+
+
+# Landmarking
+
+Now we want to place the landmarks in R. If you're reading these instructions as a html or a pdf, then go ahead and open R  (This part cannot be done in R Studio, at least I can't figure it out!)
+
+Go ahead and open R on your computer
+
+You can copy and paste the code chunks below. 
+
+Set the name of your computer in the space here so that it reads files from the folder where you have the picture stored
+
+In my computer, the path to the Box directory is like this (using your user name)
+```{r}
+setwd("/Users/YOUR_COMPUTER/Directories")
+```
+
+If you are syncing to your Box account, use this working directory:
+`setwd("/Users/ShelbyOliveaux/Box Sync/Sunda-shrew-taxonomy/GeoMorpPhotos")`
+
+Open the Geomporph Package
+```{r}
+library(geomorph)
+```
+
+Open the Landmark pdf So you have a reference. The dorsal one is `Dorsal_Landmarks.pdf` and is in the main Box directory.
+
+***Before running the code chunk below***
+
+- Make sure the file in `filelist = ` is the new cropped file on your computer.
+
+- Make sure the `tpsfile = ` name does not have `V_1` or `D_2` or whatever in is, just `V` or `D`.
+
+- Scale says how many millimeters the scale bar is (this should be 5 if following the instructions above).
+
+- `nlandmarks =` is set to the correct number of landmarks, 16 for Dorsal and XX? for Ventral
+
+- use the `verbose = TRUE` argument at first until you get the hang of it. Then you can set it to `FALSE`.
+
+**1) Load the photo in geomorph**
+
+Copy and pasting the code chunk below, edited with the correct file name and tps file output name.
+```{r}
+digitize2d(filelist = "D_1_HH_1357_39833.jpg", 
+           nlandmarks = 16, 
+           scale = 5, 
+           verbose = TRUE,
+           tpsfile = "D_HH_1357_39833.tps")
+```
+
+**2) Make the pop-up as big as you can on your screen**
+
+Expand the size of the window by grabbing the corner.
+
+**3) Set the Scale Bar**
+
+If you look at R, it will ask you to set scale. Place the pointer on the left edge of the scalebar and click. you will see a dot.
+
+![Set Scalebar](/Users/Dicrostonyx/Documents/Projects/Soricidae/Shrew_Phylogenetics/Sunda_Shrew_Landmark/Shot_5.png)
+Then click the right side of the scalebar.
+***BE AS PRECISE AS POSSIBLE!***
+In the R window, it will say `keep scale?`. Press `y` then enter
+
+**4) Start Landmarks**
+
+Now it's time to landmark!
+The order is critical. Follow along on the PDF image so you remember the number.
+
+![Five Landmarks Placed](/Users/Dicrostonyx/Documents/Projects/Soricidae/Shrew_Phylogenetics/Sunda_Shrew_Landmark/Shot_6.png)
+
+The landmarks are really small. That's ok. Just be very careful placing them. 
+
+When using `verbose = TRUE`, you will have to click `y` in the R console after placing each landmark. If you need to redo one, just click `n` and place it again.
+
+When using `verbose = FALSE` and you mess up, its ok. It is easy to close the popup window and start over.
+
+After you place all your landmarks (16 for Dorsal), the line of code will automatically finish. Check the R window to make sure. It should say `All specimens from session have been digitized to /Users/Dicrostonyx/Desktop/TPS_file_name_you_gave_it.txt` and you should see the prompt `>` below, which means its a new line of code. The tps file automatically saved on your computer. 
+
+**5) Take screenshot**
+
+Take a quick screenshot of the `quartz` popup window. Save this as `D_HH_1357_39833_Screen_Shot.jpg` and move it to the `cropped_photos` folder on box.
+
+**6) Save Landmarks**
+
+Find the TPS file, and upload it to the `Landmarks` folder on Box.
+
+## Double Check Everything
+ You should have:
+ 
+ **1)** Photo file in the `all_photos` folder in Box is renamed
+ 
+ **2)** A Cropped Photo in the `cropped_photo` folder in Box
+ 
+ **3)** A screenshot of the skull with landmarks in the `Screen_Shots` folder in Box
+ 
+ **4)** A tps file saved to the `landmarks` folder in Box
+ 
+#### Nice Work :) Go ahead to the next one! 
+
+## Instructions for Ventral Landmarks
+
+This process will basically be the same as the dorsal, except for a few minor changes.
+
+- 1	In file names, D will become V
+
+- 2	You will probably have to adjust the color / brightness / sharpness on MOST of these pictures, because they have landmark features that will be harder to see. Please do this if needed, even the slightest bit. It’s amazing how a hard to see feature can just pop out at you with a little adjustment. 
+
+- 3	Some of the features will not be visible. Either they will be broken, or covered in dried tissue. Also some photos may be very uneven. DO NOT GUESS. If the photo can’t be vertically flipped to get all the features, please report the Field # or Catalog # on the word doc and we can take a look later.
+
+- 4	I made a high res pdf of the landmarks to go along with the descriptions below. Please study up on this as you work on your first photos. 
+
+- 5	Please ask me any questions! Better to check first than have to go back and re-do stuff. 
+
+ 
+## Extra Stuff:
+
+# **Notes on Tricky Ventral Landmarks**
+
+- #3 and 4 - There are three foramen (holes) in the very distal portion of the hard palette. They form a triangle, pointing towards the back of the skull. Like this shape   -:   The upper of the two most distal/rostral holes is #3 and the back one, the "point" of the triangle is #4. 
+
+- #8 and 9 - These go in the NOTCHES, not on the protruding points. 
+
+- #10 - There is a foramen here
+
+- #13 - There is a foramen here, typically there is only one visible, even though there are two in this particular skull. If there are two, it is the lateral one (closest to the side).
+
+- #15 - This is different from the dorsal landmarks in this region. Place landmark at "corner" of the molar shelf. 
+
+- #17 - This circular piece of bone is called the tympanic annular. This landmark goes in the "upper-left" portion where the tympanic annular overlaps with the rest of the skull. It makes what kind of looks like a sideways heart, and the landmark goes on the upper portion. 
+
+- #18 - look at the line leading from 17 to 18. We want to pretend there is a line drawn on all these pictures to the furthest bottom right portion of the tympanic annular. 
+
+- #19 - below the tympanic annular, there is a gap. At the lower left corner of this gap, where it meets the section of skull that runs forward/backwards in the middle of the ears and bullae. # 19 SHOULD BE ALMOST DIRECTLY BELOW #17 AND #11. If it is not, then something is wrong! 
+
+- #20 - At the edge of the molar shelf, just behind M3, where the shelf ends there is an edge/point. 
+
+- #21 - Between M3 and M2, at the root.
+
+- #22 - Between M2 and M1, at the root.
+
+- #23 - Between M1 and P4, at the root. 
+
+
+
+# **Notes on Tricky Dorsal Landmarks**
+
+Most of them should be straight forward, but here are a few comments:
+
+- #4 Landmark centered on the midline where the two sutures meet. SOmetimes it looks like there are two sutures, or a darker line between two lighter sutures. In this case, follow the distal sutures. 
+
+- #9 Follow the suture from #5 all the way to the edge, then center the landmark here
+
+- #10 This is the most lateral part of the brain case. If you have a straight line above the top of the image parallel to the skull, and you lower the line down, this land mark will be at the first place the line touches... the absolute farthest point from the midline. 
+
+- #14 Like #10, this is the most lateral part of this portion of the skull. 
+
+- #15 This landmark is on the space between the canine tooth (distal) and the first premolar (proximal). The molars form a triangular shelf on the skull that narrows towards the rostrum (nose). Then the canines and incisors begin. The landmark needs to be at this point between them. If it;s tricky, check the ventral view of the same skull to see the spot between these teeth. 
+
+

@@ -1,0 +1,375 @@
+---
+title: "Sumatra Mapping"
+author: "Jon Nations"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Mapping the Localities from Recent Sumatra Surveys
+
+I will start by using the Coepernicus DEM data from the [Eurostat DEM](https://ec.europa.eu/eurostat/web/gisco/geodata/reference-data/elevation/copernicus-dem/elevation) website. Turns out this stuff Rules!
+
+TODO: - Merge IDN and Malaysia and Singapore Rasters and Shape Data so that Peninsula shows up on the large map. This is the 
+
+Packages
+```{r}
+pacman::p_load(tidyverse, sf, raster, spData, spDataLarge, tmap, leaflet, grDevices, rgdal, gdalUtils, rgeos)
+```
+
+
+
+
+## Reading In Raster and Shape Data 
+
+```{r}
+#Get basic elevation raster
+idn_alt <- getData('alt', country='IDN', mask=TRUE)
+mys_alt <- getData('alt', country='MYS', mask=TRUE)
+tha_alt <- getData('alt', country='THA', mask=TRUE)
+#sgp_alt <- getData('alt', country='SGP', mask=TRUE)
+idn_alt <- raster::merge(idn_alt, mys_alt, tha_alt)
+
+#Get shape data
+idn_gadm <- getData('GADM', country='IDN', level = 1)
+mys_gadm <- getData('GADM', country='MYS', level = 1)
+tha_gadm <- getData('GADM', country='THA', level = 1)
+#sgp_gadm <- getData('GADM', country='SGP', level = 1)
+idn_gadm <- union(idn_gadm, mys_gadm)
+idn_gadm <- union(idn_gadm, tha_gadm)
+```
+
+
+bounding box and projection
+```{r}
+idn_region = st_bbox(c(xmin = 93, 
+                       xmax = 107, 
+                       ymax = 7, 
+                       ymin = -8),
+                     crs = st_crs(idn_alt)) %>% 
+   st_as_sfc()
+```
+
+# Big Sumatra Map
+
+## Large Map
+
+Custom palette
+```{r}
+palls <- terrain.colors(100)
+pallsbw = gray.colors(100, start = 0.9, end =0)
+#the best
+specialbw <- c("grey90", "grey70", "grey60", "grey30", "grey15", "grey5")
+```
+
+Trying with data downloaded from  `raster` package - maybe it's sufficient? Sumatra is much bigger than Sulawesi
+```{r}
+idn_alt2 <- abs(idn_alt)
+
+map1 <- tm_shape(idn_alt2, bbox = idn_region) + 
+  tm_raster(title = "Elevation (m)", 
+            alpha = 0.9, 
+            #this makes a continuous range for the color palette
+           # style = "cont", 
+            midpoint = NA, 
+            palette = specialbw, 
+            #palette = pallsbw,
+            breaks = c(0, 500, 1000, 1500, 2000, 2500, 4651)) +
+            #labels = c ("","700m","","2100m","","3500m")) + 
+  tm_shape(idn_gadm, 
+           bbox = idn_region) + 
+  tm_polygons(border.col = "black", 
+              alpha = 0) + 
+  tm_scale_bar(position = c("center", "bottom"), 
+               text.size = 1, 
+               color.dark = "black", 
+               color.light = "grey50", 
+               lwd = 1) + 
+  tm_layout(legend.title.size = 1.5,
+            legend.text.size = 0.8,
+            legend.position = c("left","bottom"),
+            legend.bg.color = "white",
+            legend.bg.alpha = 1) + 
+  tm_graticules(lines = FALSE)
+
+#map1
+
+tmap_save(map1, file = "big_sumatra_map.pdf")
+```
+
+### Different number of breaks
+```{r}
+idn_alt2 <- abs(idn_alt)
+specialbw2 <- c("white", "grey92", "grey50", "grey25", "grey12", "grey5")
+#specialbw <- c("grey95", "grey50","grey250", "grey12", "grey5")
+map1 <- tm_shape(idn_alt2, bbox = idn_region) + 
+  tm_raster(title = "Elevation (m)", 
+            alpha = 0.9, 
+            #this makes a continuous range for the color palette
+           # style = "cont", 
+            midpoint = NA, 
+            palette = specialbw2, 
+            #palette = pallsbw,
+            breaks = c(0, 2, 700, 1400, 2100, 2700, 4651)) +
+            #labels = c ("","700m","","2100m","","3500m")) + 
+  tm_shape(idn_gadm, 
+           bbox = idn_region) + 
+  tm_polygons(border.col = "black", 
+              alpha = 0, lwd = 0.1,
+              border.alpha = 0.6) + 
+  tm_scale_bar(position = c("center", "bottom"), 
+               text.size = 1, 
+               color.dark = "black", 
+               color.light = "grey50", 
+               lwd = 1) + 
+  tm_layout(legend.title.size = 1.5,
+            legend.text.size = 0.8,
+            legend.position = c("left","bottom"),
+            legend.bg.color = "white",
+            legend.bg.alpha = 1) + 
+  tm_graticules(lines = FALSE)
+
+#map1
+
+tmap_save(map1, file = "big_sumatra_map2.pdf")
+```
+
+
+# WEST SUMATRA ZOOM 
+#### Merged DEM
+
+Just to try a smaller area to see the value of the Rasters.
+
+Looks like i need better rasters. LEt's see what I can download.
+
+## Merge Coepernicus rasters 
+
+#### Only Needed to be Done Once! 
+
+Here I am merging the tiff rasters. I downloaded the ones I need from the website above. I am trying the solution answer from [this post](https://stackoverflow.com/questions/15876591/merging-multiple-rasters-in-r)
+
+`#``{r eval = FALSE}
+r1 <- raster("10_DEM_y0x100.tif")
+r2 <- raster("10_DEM_y0x90.tif")
+r3 <- raster("10_DEM_y-10x100.tif")
+r4 <- raster("10_DEM_y-10x90.tif")
+
+x <- list(r1, r2, r3, r4)
+names(x) <- c("x", "y")
+x$filename <- 'Sumatra_Raster.tif'
+x$overwrite <- TRUE
+m <- do.call(merge, x)
+#```
+
+
+
+So for some reason the bbox isn't working.
+
+I think I need to crop the raster SEPERATELY, then plot, not using bounding box, but I don't know why. 
+
+
+```{r}
+
+x <- raster("Sumatra_Raster.tif")
+st_crs(x)
+```
+This is looking good!
+```{r}
+ws_region = st_bbox(c(xmin = 99.5, 
+                       xmax = 101, 
+                       ymax = 0.5, 
+                       ymin = -1))
+
+
+specialbw <- c("white", "grey94", "grey80", "grey72", "grey64", "grey58", "grey50", "grey40", "grey32", "grey25", "grey15", "grey5")
+
+DEM = abs(crop(x = x, y = ws_region))
+
+map2 <- tm_shape(DEM) + 
+  tm_raster(title = "Elevation (m)", 
+            alpha = 0.9, 
+            #this makes a continuous range for the color palette
+            #style = "cont", 
+            midpoint = NA, 
+            palette = specialbw, 
+            #palette = pallsbw,
+            breaks = c(0, 1, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3760),
+            labels = c ("","0m", "", "", "1000m", "", "", "2000m", "", "", "3000m","")) + 
+  tm_shape(idn_gadm, 
+           bbox = idn_region) +
+  tm_polygons(border.col = "black", 
+              alpha = 0, 
+              lwd = 0.1,
+              border.alpha = 0.6) + 
+  tm_scale_bar(position = c("left", "bottom"), 
+               text.size = .8, 
+               color.dark = "black", 
+               color.light = "grey50", 
+               lwd = 1.5) + 
+  tm_layout(legend.title.size = 1,
+            legend.text.size = 0.7,
+            legend.position = c("left","center"),
+            legend.bg.color = "white",
+            legend.bg.alpha = 0) + 
+  tm_graticules(n.x = 4,
+                lines = FALSE) 
+
+
+tmap_save(map2, file = "west_sumatra_map.pdf")
+```
+
+Try a sparser sumatra map
+```{r}
+ws_region = st_bbox(c(xmin = 99.5, 
+                       xmax = 101, 
+                       ymax = 0.5, 
+                       ymin = -1))
+
+
+specialbw2 <- c("white", "grey98", "grey50", "grey15")
+
+DEM = abs(crop(x = x, y = ws_region))
+
+map2 <- tm_shape(DEM) + 
+  tm_raster(title = "Elevation (m)", 
+            alpha = 0.9, 
+            #this makes a continuous range for the color palette
+            #style = "cont", 
+            midpoint = NA, 
+            palette = specialbw2, 
+            #palette = pallsbw,
+            breaks = c(0, 1,  1000,  2000, 3760),
+            labels = c ("", "0m", "1000m", "2000m")) + 
+  tm_shape(idn_gadm, 
+           bbox = idn_region) +
+  tm_polygons(border.col = "black", 
+              alpha = 0, 
+              lwd = 0.1,
+              border.alpha = 0.6) + 
+  tm_scale_bar(position = c("left", "bottom"), 
+               text.size = .8, 
+               color.dark = "black", 
+               color.light = "grey50", 
+               lwd = 1.5) + 
+  tm_layout(legend.title.size = 1,
+            legend.text.size = 0.7,
+            legend.position = c("left","center"),
+            legend.bg.color = "white",
+            legend.bg.alpha = 0) + 
+  tm_graticules(n.x = 4,
+                lines = FALSE) 
+
+
+tmap_save(map2, file = "west_sumatra_map_2.pdf")
+```
+And a bigger map!
+```{r}
+ws_region = st_bbox(c(xmin = 99, 
+                       xmax = 101.5, 
+                       ymax = 1, 
+                       ymin = -1.5))
+
+
+specialbw2 <- c("white", "grey98", "grey50", "grey15")
+
+DEM = abs(crop(x = x, y = ws_region))
+
+map2 <- tm_shape(DEM) + 
+  tm_raster(title = "Elevation (m)", 
+            alpha = 0.9, 
+            #this makes a continuous range for the color palette
+            #style = "cont", 
+            midpoint = NA, 
+            palette = specialbw2, 
+            #palette = pallsbw,
+            breaks = c(0, 1,  1000,  2000, 3760),
+            labels = c ("", "0m", "1000m", "2000m")) + 
+  tm_shape(idn_gadm, 
+           bbox = idn_region) +
+  tm_polygons(border.col = "black", 
+              alpha = 0, 
+              lwd = 0.7,
+              border.alpha = 0.6) + 
+  tm_scale_bar(position = c("left", "bottom"), 
+               text.size = .8, 
+               color.dark = "black", 
+               color.light = "grey50", 
+               lwd = 1.5) + 
+  tm_layout(legend.title.size = 1,
+            legend.text.size = 0.7,
+            legend.position = c("left","center"),
+            legend.bg.color = "white",
+            legend.bg.alpha = 0) + 
+  tm_graticules(n.x = 4,
+                lines = FALSE) 
+
+
+tmap_save(map2, file = "west_sumatra_map_3.pdf")
+```
+
+And a bigger map!-1.6918650480214894, 101.41197584482654
+```{r}
+ws_region = st_bbox(c(xmin = 99, 
+                       xmax = 102, 
+                       ymax = 1.25, 
+                       ymin = -2.75))
+
+
+specialbw2 <- c("white", "grey94", "grey50", "grey15")
+
+DEM = abs(crop(x = x, y = ws_region))
+
+map4 <- tm_shape(DEM) + 
+  tm_raster(title = "Elevation (m)", 
+            alpha = 0.9, 
+            #this makes a continuous range for the color palette
+            #style = "cont", 
+            midpoint = NA, 
+            palette = specialbw2, 
+            #palette = pallsbw,
+            breaks = c(0, 1,  1000,  2000, 3760),
+            labels = c ("", "<1000m", "1000-2000m", ">2000m")) + 
+  tm_shape(idn_gadm, 
+           bbox = idn_region) +
+  tm_polygons(border.col = "black", 
+              alpha = 0, 
+              lwd = 0.7,
+              border.alpha = 0.6) + 
+  tm_scale_bar(position = c("center", "bottom"), 
+               text.size = .8, 
+               color.dark = "black", 
+               color.light = "grey50", 
+               lwd = 1.5) + 
+  tm_layout(legend.title.size = 1,
+            legend.text.size = 0.7,
+            legend.position = c("right","top"),
+            legend.bg.color = "white",
+            legend.bg.alpha = 0) + 
+  tm_graticules(n.x = 4,
+                lines = FALSE) 
+
+
+tmap_save(map4, file = "west_sumatra_map_4.pdf")
+```
+inset map
+```{r}
+wr_region = st_bbox(c(xmin = 95, 
+                       xmax = 130, 
+                       ymax = 15, 
+                       ymin = -15))
+wrmap <- tm_shape(world, bbox = wr_region) + tm_polygons()
+
+tmap_save(wrmap, file = "inset_map.pdf")
+```
+
+
+
+```{r}
+library(stars)
+rm(DEM)
+tif = system.file("Sumatra_Raster.tif", proxy=)
+(x = read_stars(tif))
+
+#DEM <- raster("Sumatra_Raster.tif")
+DEM <- read_stars(tif)
+```
+

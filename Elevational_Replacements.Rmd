@@ -1,0 +1,106 @@
+---
+title: "Elevational_Replacement_Tests"
+output: html_notebook
+---
+
+# Elevational Replacements
+
+So it looks like, between the 3 pairs, the dewi/balingka pair differs the most strongly.
+
+```{r}
+pacman::p_load(tidyverse, scales)
+
+dat <- read_csv("working_shrew_database_20220703.csv")
+```
+
+How do umbra, monticola, foetida, baluensis, balingka, and dewi compare? using the foetida doriae from Hinkley
+
+```{r}
+dat %>% 
+  filter(Species %in% c( 'monticola','umbra', 'foetida_doriae',  'baluensis', 'balingka', 'dewi'))%>%
+  mutate(across(Species, factor, levels=c( 'monticola','umbra', 'foetida_doriae',  'baluensis', 'balingka', 'dewi'))) %>% 
+  mutate(Species = recode(Species, 'foetida_doriae' = "foetida"),
+         Species = recode(Species, 'foetida_kelabit' = "foetida")) %>% 
+  filter(!(Species == 'monticola' & Locality != 'Gede')) %>% 
+  filter(!(Species == 'foetida' & Locality %in% c('Mt. Kinabalu_Sabah', 'Mt. Kinabalu'))) %>%
+  filter(!(Species == 'baluensis' & Locality %in% c('Mt. Kinabalu_Sabah', 'Mt. Kinabalu'))) %>%
+  ggplot(aes(x = Species, y = Condyloincisive)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2) +
+  facet_wrap(~Island, scales = "free") +
+  labs(y = "Condyloincisive Length (mm)", x = "") +
+  theme_bw() +
+  scale_y_continuous(breaks= pretty_breaks()) +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(size = 12))
+
+ggsave("Elevation_Replace_1.pdf", height = 3.5, width = 6)
+```
+
+## Elevation and Skull Length
+
+Function for good breaks on all facets. This sets different breaks for each facet plot based on if else arguments.
+
+```{r}
+breaks_fun <- function(x) {
+  if (max(x) > 3300) {
+    seq(1000, 3000, 1000)
+    } else if (max(x) > 2800 & min(x) < 2000) {
+      seq(2000, 2800, 400)
+      } else  {
+        seq(1500, 1900, 200)
+      }
+  } 
+```
+
+```{r}
+
+p1 <- dat %>% 
+  filter(Species %in% c( 'monticola','umbra', 'foetida_doriae',  'baluensis', 'balingka', 'dewi'))%>%
+  mutate(across(Species, factor, levels=c( 'monticola','umbra', 'foetida_doriae',  'baluensis', 'balingka', 'dewi'))) %>% 
+  mutate(Species = recode(Species, 'foetida_doriae' = "foetida"),
+         Species = recode(Species, 'foetida_kelabit' = "foetida")) %>% 
+  filter(!(Species == 'monticola' & Locality != 'Gede')) %>% 
+  filter(!(Species == 'foetida' & Locality %in% c('Mt. Kinabalu_Sabah', 'Mt. Kinabalu'))) %>%
+  filter(!(Species == 'baluensis' & Locality %in% c('Mt. Kinabalu_Sabah', 'Mt. Kinabalu'))) %>%
+  ggplot(aes(x = Elevation, y = Condyloincisive, shape = Species)) +
+  geom_point(size = 2.6) +
+  scale_shape_manual(values = rep(c(7,1), 3)) +
+  facet_wrap(~Island, scales = "free") +
+  labs(y = "Condyloincisive Length (mm)", x = "Elevation (m)") +
+  theme_bw() +
+  #scale_x_continuous(breaks=equal_breaks(n=3, s=0.05), 
+  #                   expand = c(0.05, 0)) +
+  scale_x_continuous(breaks = breaks_fun) +
+  scale_y_continuous(breaks= pretty_breaks()) +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(size = 12))
+
+p1
+#ggsave("Elevation_Replace.pdf", height = 3.5, width = 6)
+```
+
+code to search for values to use for segments
+
+```{r}
+dat %>% filter(Species == 'dewi',  Elevation >= 2100, Condyloincisive >= 17.5) %>% select(c("Elevation", "Condyloincisive"))
+```
+
+```{r}
+sp_text <- data.frame(x=c(3000,2225,1820, 1790, 2500, 2400),y=c(22.75,24.2, 15.75, 17.75, 17.53, 21.25),Island=c("Borneo", "Borneo", "Java", "Java", "Sumatra", "Sumatra"),Species=c("foetida","baluensis", "monticola", "umbra", "balingka", "dewi"))
+
+
+ann_line<-data.frame(x=c(1676, 3350, 1611, 1950, 2100, 2826),
+                     xend=c(2450,2700, 1750, 1810, 2315, 2510),
+                     y=c(22.72, 24.47, 15.95, 18.02, 17.2, 21.46),
+                     yend=c(22.75, 24.25, 15.8, 17.8, 17.5, 21.25),
+                     Island=c("Borneo", "Borneo", "Java", "Java", "Sumatra", "Sumatra"),
+                     Species=c('foetida', "baluensis", "monticola", "umbra", "balingka", 'dewi'))
+p1 + geom_text(data=sp_text,aes(x=x,y=y,label=Species),size=4,show_guide=F) +
+    geom_segment(data=ann_line,aes(x=x,xend=xend,y=y,yend=yend, Species = Species)) + theme(legend.position = "none")
+ggsave("Elevation_Replace_2.pdf", height = 3.5, width = 6)
+```
+
+```{r}
+dat %>% filter(Species == 'umbra', Elevation >= 1850, Condyloincisive != "NA") %>% select(c("Elevation", "Condyloincisive"))
+```

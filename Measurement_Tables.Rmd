@@ -1,0 +1,95 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+Try some plotting!
+Looking for differences in Sumatra shrews.
+
+Below is a bunch of preliminary plotting using some confusing speciemns that I can't identify.
+Now the new functional database is complete
+```{r}
+pacman::p_load(tidyverse, patchwork, kableExtra)
+```
+# Read Data
+
+```{r}
+db <- read_csv("Sumatra_DB.csv") %>%
+  rownames_to_column("id") %>% 
+  as_tibble() %>% 
+  dplyr::select(c(2:26)) %>% dplyr::select(!c(Species, Island, Locality, RAL, Collector)) %>% 
+  mutate(Catalog = as.character(Catalog),
+         HB = Total - Tail,
+         RTL = Tail / HB) %>%
+  drop_na()
+```
+### Tables
+```{r}
+qtab <- function(metric) {
+db %>% 
+    #filter(Locality == "Talamau") %>%
+    filter(Sp2 != "unknown") %>%
+    mutate(Sp2 = recode(Sp2, "utongensis" = "neglecta")) %>%
+    mutate(RSW = Condyloincisive / Brain_Breadth) %>%
+    mutate(RRW = Rostral_Length / Rostral_Width) %>%
+    mutate(IL = Upper_Tooth - P4_M3,
+           IC = Interorbit_Width / Condyloincisive,
+           SMW = Interorbit_Width / M2_M2_Labial) %>%
+   #filter(Sp2 %in% c("dewi", "hutanis", "lepidura"), !is.na({{metric}})) %>%
+   filter( !is.na({{metric}})) %>%
+  select(Sp2, {{metric}}) %>% 
+  group_by(Sp2) %>% 
+  summarise(mean = mean({{metric}}),
+            sd = sd({{metric}}),
+            min = min({{metric}}),
+            max = max({{metric}}),
+            n = length({{metric}})) %>% 
+    mutate_if(is.numeric, ~round(., 2)) %>% 
+    mutate(min = paste0("(", min),
+                    max = paste0("-", max, ")"),
+                    sd = paste0("±", sd),
+                    n = paste0("(n=", n, ")")) %>% 
+  unite(Mean, mean, sd, sep = " ") %>% 
+  unite(Species, Sp2, n, sep = " ") %>% 
+  unite(Range, min, max, sep = "") %>% 
+  unite(Mean, Mean, Range, sep='<br/>')
+}
+```
+# Quick Table function
+```{r}
+a1 <- qtab(Condyloincisive ) %>% add_column(metric = 'CIL') 
+a2 <- qtab(Brain_Breadth) %>% add_column(metric = 'BBC') 
+a3 <- qtab(Interorbit_Width) %>% add_column(metric = 'IOW')
+a4 <- qtab( Rostral_Length) %>% add_column(metric = 'RL')
+a5 <- qtab(Rostral_Width) %>% add_column(metric = 'RW')
+a6 <- qtab(P_palate_Depth) %>% add_column(metric = 'PPD')
+a7 <- qtab(P_palate_Length) %>% add_column(metric = 'PPL')
+a8 <- qtab(Condyle_Glenoid) %>% add_column(metric = 'CGF')
+a9 <- qtab(Upper_Tooth) %>% add_column(metric = 'UTL')
+a10<- qtab(P4_M3) %>% add_column(metric = 'P4_M3')
+a11<- qtab(M2_M2_Labial) %>% add_column(metric = 'M2_M2')
+a12<- qtab(Total) %>% add_column(metric = 'Total')
+a13<- qtab(HB) %>% add_column(metric = 'HB')
+a14<- qtab(Tail) %>% add_column(metric = 'Tail')
+a15<- qtab(HF) %>% add_column(metric = 'HF') 
+a16<- qtab(Mass) %>% add_column(metric = 'Mass') 
+
+tabs <- bind_rows(a1 , a2 , a3 , a4 , a5 , a6 , a7 , a8 , a9 , a10, a11, a12, a13, a14, a15, a16) %>%
+  #mutate(Mean = str_replace_all(Mean , "\n", "<br>")) %>%
+           pivot_wider(names_from = Species, values_from = Mean) %>% 
+  rename(variable = metric) %>% 
+           as.data.frame()
+
+write_csv(tabs, "Measurements.csv")
+#$tabs$mean <- stringr::str_replace_all(tabs$mean , "\n", "<br>")
+
+tabs %>% kbl(longtable = T, escape = F) %>% kable_classic(full_width = F, html_font = "Cambria", font_size = 10) %>%
+  save_kable(file = "Measurements.pdf",zoom = 2, density = 600, keep_tex = T)
+
+
+tabs %>% kbl(longtable = T, escape = F) %>% kable_paper() %>%
+  scroll_box(width = "850px", height = "800px")
+```
+
+
+
+

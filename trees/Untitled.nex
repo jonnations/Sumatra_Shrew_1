@@ -1,0 +1,221 @@
+#NEXUS
+begin taxa;
+	dimensions ntax=119;
+	taxlabels
+	'AB077072.1_Crocidura_lasiura_Cytb_gene_for_cytochrome_b__complete_cds__specimen_voucher_SO2Kmisc59'
+	'AB077074.1_Crocidura_watasei_Cytb_gene_for_cytochrome_b__complete_cds__specimen_voucher_HS600'
+	C_sp_Tujuh_voucher_IZEA4503_cytochrome_b_2
+	Crocidura_abscondita__Java-Gede__FMNH212794
+	Crocidura_attenuata__China__ROM116033
+	Crocidura_balingka__Sumatra-Singgalang__FMNH212952
+	Crocidura_balingka__Sumatra-Singgalang__FMNH212965
+	Crocidura_balingka__Sumatra-Singgalang__FMNH212967
+	Crocidura_balingka__Sumatra-Singgalang__FMNH212969
+	Crocidura_balingka__Sumatra-Singgalang__FMNH212974
+	Crocidura_balingka__Sumatra-Singgalang__FMNH212977
+	Crocidura_balingka__Sumatra-Singgalang__LSUMZ40234
+	Crocidura_balingka__Sumatra-Singgalang__LSUMZ40236
+	Crocidura_balingka__Sumatra-Singgalang__LSUMZ40238
+	Crocidura_balingka__Sumatra-Singgalang__LSUMZ40239
+	Crocidura_balingka__Sumatra-Singgalang__LSUMZ40241
+	'Crocidura_barapi.__Sumatra-Talamau__LSUMZ39773'
+	Crocidura_barapi__Sumatra-Talamau__LSUMZ39748
+	Crocidura_barapi__Sumatra-Talamau__LSUMZ39752
+	Crocidura_barapi__Sumatra-Talamau__LSUMZ39759
+	Crocidura_barapi__Sumatra-Talamau__LSUMZ39768
+	Crocidura_barapi__Sumatra-Talamau__LSUMZ39772
+	Crocidura_barapi__Sumatra-Talamau__LSUMZ39776
+	Crocidura_barapi__Sumatra-Talamau__LSUMZ39777
+	Crocidura_barapi__Sumatra-Talamau__LSUMZ39785
+	Crocidura_barapi__Sumatra-Talamau__LSUMZ_39782
+	Crocidura_beatus__Philippines__FMNH146965
+	Crocidura_beatus__Philippines__FMNH147819
+	Crocidura_beccarii__Sumatra-Singgalang__FMNH212953
+	Crocidura_beccarii__Sumatra-Singgalang__LSUMZ40213
+	Crocidura_beccarii__Sumatra-Singgalang__LSUMZ40243
+	Crocidura_beccarii__Sumatra-Tujuh__FMNH212818
+	Crocidura_beccarii__Sumatra-Tujuh__FMNH212820
+	Crocidura_beccarii__Sumatra-Tujuh__FMNH212834
+	Crocidura_brunnea__Java-Gede__FMNH212744
+	Crocidura_brunnea__Java-Ijen__LSUMZ37945
+	Crocidura_brunnea__Java-Slamet__MZB32084
+	'Crocidura_cf._neglecta__Borneo-Sabah__KU168063'
+	'Crocidura_cf.neglecta__Borneo-Kalimantan__UMMZ174676'
+	'Crocidura_cf.neglecta__Borneo-Kalimantan__UMMZ174683'
+	'Crocidura_cf.neglecta__Malaysia_Peninsula__JX162650'
+	Crocidura_dewi__Sumatra-Singgalang__LSUMZ40216
+	Crocidura_dewi__Sumatra-Singgalang__LSUMZ40245
+	Crocidura_dewi__Sumatra-Singgalang__LSUMZ40247
+	Crocidura_dewi__Sumatra-Singgalang__LSUMZ40248
+	Crocidura_dracula__Vietnam__AMCC101526
+	Crocidura_elongata__Sulawesi__LSUMZ36906
+	Crocidura_elongata__Sulawesi__LSUMZ36907
+	Crocidura_foetida__Borneo-Sarawak__USNM590298
+	Crocidura_foetida__Borneo-Sarawak__USNM590299
+	Crocidura_fuliginosa__Malaysia_Peninsula__IZEA3553
+	Crocidura_grayi__Philippines__FMNH167217
+	Crocidura_grayi__Philippines__FMNH194718
+	Crocidura_hutanis__Sumatra-Leuser__MVZ192172
+	Crocidura_hutanis__Sumatra-Leuser__MVZ192174
+	Crocidura_hutanis__Sumatra-Singgalang__FMNH212950
+	Crocidura_hutanis__Sumatra-Singgalang__LSUMZ40205
+	Crocidura_hutanis__Sumatra-Singgalang__LSUMZ40206
+	Crocidura_hutanis__Sumatra-Singgalang__LSUMZ40209
+	Crocidura_hutanis__Sumatra-Singgalang__LSUMZ40210
+	Crocidura_hutanis__Sumatra-Talamau__LSUMZ39788
+	Crocidura_kurodai__Taiwan__NTU980
+	Crocidura_lepidura__Sumatra-Tujuh__FMNH212856
+	Crocidura_lepidura__Sumatra-Tujuh__FMNH212858
+	Crocidura_lepidura__Sumatra-Tujuh__FMNH212859
+	Crocidura_lepidura__Sumatra-Tujuh__FMNH212861
+	Crocidura_lepidura__Sumatra-Tujuh__FMNH212863
+	Crocidura_lepidura__Sumatra-Tujuh__FMNH213413
+	Crocidura_malayana__Malaysia_Peninsula__IZEA3552
+	Crocidura_maxi__Aru__WAM37975
+	Crocidura_maxi__Bali__WAM38557
+	Crocidura_maxi__Java-Ijen__LSUMZ37981
+	Crocidura_maxi__Java-Ijen__LSUMZ37982
+	Crocidura_mindorus__Philippines__CMC3582
+	Crocidura_monticola__Java-Gede__MZB33648
+	Crocidura_monticola__Java-Ijen__LSUMZ37983
+	Crocidura_monticola__Java-Salak__MZB31720
+	Crocidura_monticola__Java-Slamet__LSUMZ37988
+	Crocidura_monticola__Java-Slamet__MZB32148
+	Crocidura_neglecta__Sumatra-Singgalang__LSUMZ40218
+	Crocidura_neglecta__Sumatra-Talamau__LSUMZ39750
+	Crocidura_neglecta__Sumatra-Talamau__LSUMZ39794
+	Crocidura_neglecta__Sumatra-Talamau__LSUMZ39807
+	Crocidura_neglecta__Sumatra-Talamau__LSUMZ39808
+	Crocidura_neglecta__Sumatra-Talamau__LSUMZ39811
+	Crocidura_neglecta__Sumatra-Talamau__LSUMZ39826
+	Crocidura_neglecta__Sumatra-Talamau__LSUMZ39827
+	Crocidura_neglecta__Sumatra-Tujuh__FMNH212877
+	Crocidura_negrina__Philippines__KU165046
+	Crocidura_negrina__Philippines__KU165047
+	Crocidura_nigripes__Sulawesi__IZEA4400
+	Crocidura_ninoyi__Philippines__FMNH145685
+	Crocidura_orientalis__Java-Ciremai__MZB28396
+	Crocidura_orientalis__Java-Ciremai__MZB28402
+	Crocidura_orientalis__Java-Gede__FMNH212778
+	Crocidura_palawanensis__Philippines__FMNH195214
+	Crocidura_palawanensis__Philippines__FMNH195215
+	Crocidura_panayensis__Philippines__KU164874
+	Crocidura_panayensis__Philippines__KU164875
+	Crocidura_paradoxura__Sumatra-Singgalang__FMNH212954
+	Crocidura_paradoxura__Sumatra-Singgalang__FMNH212955
+	Crocidura_paradoxura__Sumatra-Singgalang__FMNH212956
+	Crocidura_paradoxura__Sumatra-Tujuh__FMNH212886
+	Crocidura_paradoxura__Sumatra-Tujuh__FMNH213415
+	Crocidura_tanakae__Taiwan__NTU971
+	Crocidura_umbra__Java-Gede__FMNH212763
+	Crocidura_umbra__Java-Gede__FMNH212779
+	Crocidura_umbra__Java-Gede__FMNH212785
+	Crocidura_vosmaeri__Sumatra-Bangka_Island__LSUMZ38076
+	Crocidura_vosmaeri__Sumatra-Bangka_Island__LSUMZ38077
+	Crocidura_vosmaeri__Sumatra-Bangka_Island__LSUMZ38078
+	Crocidura_wuchihensis__China__ROM116090
+	'HM587011.1_Crocidura_phuquocensis_voucher_ZISP_96660_cytochrome_b__cytb__gene__complete_cds__mitochondrial'
+	'HM587026.1_Crocidura_zaitsevi_voucher_ZISP_97643_cytochrome_b__cytb__gene__complete_cds__mitochondrial'
+	'MW075588.1_Crocidura_indochinensis_isolate_97670_cytochrome_b__cytb__gene__partial_cds__mitochondrial'
+	'MW075590.1_Crocidura_sapaensis_isolate_97791_cytochrome_b__cytb__gene__partial_cds__mitochondrial'
+	'MZ556326.1_Crocidura_nicobarica_mitochondrion__complete_genome'
+	'MZ556326.1_Crocidura_nicobarica_mitochondrion__complete_genome_1'
+	'Suncus.murinus.AB033610.1'
+;
+end;
+
+begin trees;
+	tree tree_1 = [&R] (((((Crocidura_abscondita__Java-Gede__FMNH212794:0.075659,((((Crocidura_beatus__Philippines__FMNH146965:0.011761,Crocidura_beatus__Philippines__FMNH147819:0.00883)[&label=100]:0.034901,(((Crocidura_grayi__Philippines__FMNH167217:0.022348,Crocidura_grayi__Philippines__FMNH194718:0.020247)[&label=99]:0.01402,(Crocidura_palawanensis__Philippines__FMNH195214:2.0E-6,Crocidura_palawanensis__Philippines__FMNH195215:0.005577)[&label=100]:0.045278)[&label=53]:0.005931,(Crocidura_mindorus__Philippines__CMC3582:0.044329,(((Crocidura_negrina__Philippines__KU165046:0.002458,Crocidura_negrina__Philippines__KU165047:0.001633)[&label=100]:0.011737,(Crocidura_panayensis__Philippines__KU164874:2.0E-6,Crocidura_panayensis__Philippines__KU164875:0.00135)[&label=100]:0.012609)[&label=69]:0.001694,Crocidura_ninoyi__Philippines__FMNH145685:0.01916)[&label=99]:0.017104)[&label=80]:0.003072)[&label=43]:0.001887)[&label=96]:0.02314,Crocidura_nigripes__Sulawesi__IZEA4400:0.058138)[&label=49]:0.004667,(Crocidura_foetida__Borneo-Sarawak__USNM590298:0.002268,Crocidura_foetida__Borneo-Sarawak__USNM590299:0.006009)[&label=100]:0.049693)[&label=31]:0.00825)[&label=24]:2.78E-4,(((Crocidura_paradoxura__Sumatra-Singgalang__FMNH212954:2.0E-6,Crocidura_paradoxura__Sumatra-Singgalang__FMNH212955:2.0E-6)[&label=100]:0.001181,Crocidura_paradoxura__Sumatra-Singgalang__FMNH212956:0.001579)[&label=99]:0.020931,(Crocidura_paradoxura__Sumatra-Tujuh__FMNH212886:2.0E-6,Crocidura_paradoxura__Sumatra-Tujuh__FMNH213415:0.001368)[&label=100]:0.026549)[&label=96]:0.022912)[&label=41]:0.010082,(((((((Crocidura_beccarii__Sumatra-Singgalang__FMNH212953:0.011594,((Crocidura_beccarii__Sumatra-Singgalang__LSUMZ40213:0.001319,Crocidura_beccarii__Sumatra-Singgalang__LSUMZ40243:0.005444)[&label=68]:0.001343,(Crocidura_beccarii__Sumatra-Tujuh__FMNH212818:2.0E-6,(Crocidura_beccarii__Sumatra-Tujuh__FMNH212820:2.0E-6,Crocidura_beccarii__Sumatra-Tujuh__FMNH212834:0.001369)[&label=64]:0.001367)[&label=98]:2.0E-6)[&label=99]:0.004728)[&label=98]:0.009718,(Crocidura_vosmaeri__Sumatra-Bangka_Island__LSUMZ38076:2.0E-6,(Crocidura_vosmaeri__Sumatra-Bangka_Island__LSUMZ38077:0.001362,Crocidura_vosmaeri__Sumatra-Bangka_Island__LSUMZ38078:2.0E-6)[&label=85]:0.002754)[&label=100]:0.010382)[&label=98]:0.010971,((Crocidura_orientalis__Java-Ciremai__MZB28396:0.001151,Crocidura_orientalis__Java-Ciremai__MZB28402:0.002991)[&label=100]:0.019532,Crocidura_orientalis__Java-Gede__FMNH212778:0.018903)[&label=97]:0.013056)[&label=63]:0.001368,(((Crocidura_hutanis__Sumatra-Leuser__MVZ192172:0.002741,Crocidura_hutanis__Sumatra-Leuser__MVZ192174:2.0E-6)[&label=100]:0.013236,(((Crocidura_hutanis__Sumatra-Singgalang__FMNH212950:2.0E-6,(Crocidura_hutanis__Sumatra-Singgalang__LSUMZ40205:2.0E-6,Crocidura_hutanis__Sumatra-Singgalang__LSUMZ40206:2.0E-6)[&label=68]:2.0E-6)[&label=55]:2.0E-6,(Crocidura_hutanis__Sumatra-Singgalang__LSUMZ40209:2.0E-6,Crocidura_hutanis__Sumatra-Singgalang__LSUMZ40210:2.0E-6)[&label=93]:0.001333)[&label=100]:0.004383,Crocidura_hutanis__Sumatra-Talamau__LSUMZ39788:0.005653)[&label=100]:0.013479)[&label=67]:0.004817,(((Crocidura_lepidura__Sumatra-Tujuh__FMNH212856:2.0E-6,Crocidura_lepidura__Sumatra-Tujuh__FMNH212858:2.0E-6)[&label=89]:0.002754,Crocidura_lepidura__Sumatra-Tujuh__FMNH212859:2.0E-6)[&label=62]:2.0E-6,((Crocidura_lepidura__Sumatra-Tujuh__FMNH212861:2.0E-6,Crocidura_lepidura__Sumatra-Tujuh__FMNH212863:2.0E-6)[&label=75]:2.0E-6,Crocidura_lepidura__Sumatra-Tujuh__FMNH213413:2.0E-6)[&label=63]:0.001371)[&label=100]:0.018279)[&label=99]:0.013093)[&label=67]:0.003246,('MZ556326.1_Crocidura_nicobarica_mitochondrion__complete_genome':2.0E-6,'MZ556326.1_Crocidura_nicobarica_mitochondrion__complete_genome_1':2.0E-6)[&label=100]:0.028509)[&label=56]:0.004357,((Crocidura_brunnea__Java-Gede__FMNH212744:2.0E-6,Crocidura_brunnea__Java-Slamet__MZB32084:0.00137)[&label=92]:0.001256,Crocidura_brunnea__Java-Ijen__LSUMZ37945:0.003251)[&label=100]:0.024635)[&label=93]:0.017401,Crocidura_malayana__Malaysia_Peninsula__IZEA3552:0.040661)[&label=57]:0.004858)[&label=94]:0.042399,((((((Crocidura_attenuata__China__ROM116033:0.10201,('HM587011.1_Crocidura_phuquocensis_voucher_ZISP_96660_cytochrome_b__cytb__gene__complete_cds__mitochondrial':0.149166,'AB077074.1_Crocidura_watasei_Cytb_gene_for_cytochrome_b__complete_cds__specimen_voucher_HS600':0.126294)[&label=59]:0.012412)[&label=47]:0.011301,((('Crocidura_cf.neglecta__Borneo-Kalimantan__UMMZ174676':0.007995,((Crocidura_neglecta__Sumatra-Tujuh__FMNH212877:0.009496,Crocidura_neglecta__Sumatra-Singgalang__LSUMZ40218:0.010171)[&label=74]:0.005175,(Crocidura_neglecta__Sumatra-Talamau__LSUMZ39794:0.001437,((((Crocidura_neglecta__Sumatra-Talamau__LSUMZ39750:0.023833,Crocidura_neglecta__Sumatra-Talamau__LSUMZ39807:0.017008)[&label=66]:0.003669,Crocidura_neglecta__Sumatra-Talamau__LSUMZ39808:0.00554)[&label=78]:0.005734,Crocidura_neglecta__Sumatra-Talamau__LSUMZ39827:0.001266)[&label=82]:0.003999,(Crocidura_neglecta__Sumatra-Talamau__LSUMZ39826:2.0E-6,Crocidura_neglecta__Sumatra-Talamau__LSUMZ39811:2.0E-6)[&label=87]:2.0E-6)[&label=62]:2.0E-6)[&label=99]:0.019737)[&label=51]:0.001344)[&label=94]:0.022264,('Crocidura_cf.neglecta__Borneo-Kalimantan__UMMZ174683':0.0446,'Crocidura_cf._neglecta__Borneo-Sabah__KU168063':0.040128)[&label=69]:0.010875)[&label=62]:0.010665,'Crocidura_cf.neglecta__Malaysia_Peninsula__JX162650':0.028753)[&label=100]:0.072918)[&label=24]:0.012944,(((Crocidura_kurodai__Taiwan__NTU980:9.95E-4,'AB077072.1_Crocidura_lasiura_Cytb_gene_for_cytochrome_b__complete_cds__specimen_voucher_SO2Kmisc59':0.049991)[&label=100]:0.084017,'HM587026.1_Crocidura_zaitsevi_voucher_ZISP_97643_cytochrome_b__cytb__gene__complete_cds__mitochondrial':0.098302)[&label=55]:0.007766,Crocidura_tanakae__Taiwan__NTU971:0.133656)[&label=58]:0.009185)[&label=16]:0.004743,((Crocidura_fuliginosa__Malaysia_Peninsula__IZEA3553:0.061257,Crocidura_dracula__Vietnam__AMCC101526:0.067217)[&label=84]:0.042096,(Crocidura_wuchihensis__China__ROM116090:0.05949,('MW075590.1_Crocidura_sapaensis_isolate_97791_cytochrome_b__cytb__gene__partial_cds__mitochondrial':0.031911,'MW075588.1_Crocidura_indochinensis_isolate_97670_cytochrome_b__cytb__gene__partial_cds__mitochondrial':0.02527)[&label=98]:0.027546)[&label=92]:0.035159)[&label=54]:0.024205)[&label=30]:0.010888,((((((((Crocidura_balingka__Sumatra-Singgalang__FMNH212952:2.0E-6,Crocidura_balingka__Sumatra-Singgalang__LSUMZ40241:2.0E-6)[&label=62]:0.001302,((Crocidura_balingka__Sumatra-Singgalang__FMNH212967:0.0,Crocidura_balingka__Sumatra-Singgalang__FMNH212977:0.0):2.0E-6,Crocidura_balingka__Sumatra-Singgalang__FMNH212974:2.0E-6)[&label=54]:2.0E-6)[&label=50]:2.0E-6,(Crocidura_balingka__Sumatra-Singgalang__LSUMZ40236:2.0E-6,Crocidura_balingka__Sumatra-Singgalang__LSUMZ40238:2.0E-6)[&label=86]:2.0E-6)[&label=37]:2.0E-6,(Crocidura_balingka__Sumatra-Singgalang__FMNH212969:2.0E-6,Crocidura_balingka__Sumatra-Singgalang__LSUMZ40234:2.0E-6)[&label=63]:0.001267)[&label=61]:0.001263,(Crocidura_balingka__Sumatra-Singgalang__FMNH212965:2.0E-6,Crocidura_balingka__Sumatra-Singgalang__LSUMZ40239:2.0E-6)[&label=63]:2.0E-6)[&label=100]:0.062826,(((Crocidura_dewi__Sumatra-Singgalang__LSUMZ40216:2.0E-6,Crocidura_dewi__Sumatra-Singgalang__LSUMZ40248:2.0E-6)[&label=67]:2.0E-6,Crocidura_dewi__Sumatra-Singgalang__LSUMZ40247:2.0E-6)[&label=63]:0.001271,Crocidura_dewi__Sumatra-Singgalang__LSUMZ40245:2.0E-6)[&label=100]:0.033468)[&label=68]:0.002557,C_sp_Tujuh_voucher_IZEA4503_cytochrome_b_2:0.046891)[&label=97]:0.037478,(((Crocidura_barapi__Sumatra-Talamau__LSUMZ39752:2.0E-6,Crocidura_barapi__Sumatra-Talamau__LSUMZ39759:2.0E-6)[&label=80]:2.0E-6,Crocidura_barapi__Sumatra-Talamau__LSUMZ39776:2.0E-6)[&label=66]:0.001295,((((Crocidura_barapi__Sumatra-Talamau__LSUMZ39772:0.0,Crocidura_barapi__Sumatra-Talamau__LSUMZ_39782:0.0):2.0E-6,'Crocidura_barapi.__Sumatra-Talamau__LSUMZ39773':2.0E-6)[&label=97]:2.0E-6,Crocidura_barapi__Sumatra-Talamau__LSUMZ39777:2.0E-6)[&label=32]:2.0E-6,((Crocidura_barapi__Sumatra-Talamau__LSUMZ39768:0.001292,Crocidura_barapi__Sumatra-Talamau__LSUMZ39748:0.005615)[&label=30]:2.0E-6,Crocidura_barapi__Sumatra-Talamau__LSUMZ39785:0.004338)[&label=46]:2.0E-6)[&label=52]:2.0E-6)[&label=100]:0.041629)[&label=41]:0.005719)[&label=40]:0.007767,((((Crocidura_monticola__Java-Gede__MZB33648:0.012335,Crocidura_monticola__Java-Salak__MZB31720:0.007449)[&label=86]:0.004463,(Crocidura_monticola__Java-Slamet__LSUMZ37988:0.00134,Crocidura_monticola__Java-Slamet__MZB32148:2.0E-6)[&label=100]:0.010993)[&label=59]:0.004516,((Crocidura_umbra__Java-Gede__FMNH212763:2.0E-6,Crocidura_umbra__Java-Gede__FMNH212785:0.001352)[&label=64]:0.001333,Crocidura_umbra__Java-Gede__FMNH212779:2.0E-6)[&label=100]:0.021254)[&label=98]:0.044173,Crocidura_monticola__Java-Ijen__LSUMZ37983:0.038827)[&label=77]:0.013165)[&label=96]:0.066372)[&label=98]:0.070822,((Crocidura_elongata__Sulawesi__LSUMZ36906:0.004178,Crocidura_elongata__Sulawesi__LSUMZ36907:0.005441)[&label=100]:0.123002,((Crocidura_maxi__Aru__WAM37975:0.019519,(Crocidura_maxi__Java-Ijen__LSUMZ37981:0.004261,Crocidura_maxi__Java-Ijen__LSUMZ37982:0.003957)[&label=100]:0.014451)[&label=99]:0.03044,Crocidura_maxi__Bali__WAM38557:0.020985)[&label=100]:0.121427)[&label=80]:0.03881,'Suncus.murinus.AB033610.1':0.366152);
+end;
+
+begin figtree;
+	set appearance.backgroundColorAttribute="Default";
+	set appearance.backgroundColour=#ffffff;
+	set appearance.branchColorAttribute="User selection";
+	set appearance.branchColorGradient=false;
+	set appearance.branchLineWidth=1.0;
+	set appearance.branchMinLineWidth=0.0;
+	set appearance.branchWidthAttribute="Fixed";
+	set appearance.foregroundColour=#000000;
+	set appearance.hilightingGradient=false;
+	set appearance.selectionColour=#2d3680;
+	set branchLabels.colorAttribute="User selection";
+	set branchLabels.displayAttribute="Branch times";
+	set branchLabels.fontName="sansserif";
+	set branchLabels.fontSize=8;
+	set branchLabels.fontStyle=0;
+	set branchLabels.isShown=false;
+	set branchLabels.significantDigits=4;
+	set layout.expansion=0;
+	set layout.layoutType="RECTILINEAR";
+	set layout.zoom=0;
+	set legend.attribute=null;
+	set legend.fontSize=10.0;
+	set legend.isShown=false;
+	set legend.significantDigits=4;
+	set nodeBars.barWidth=4.0;
+	set nodeBars.displayAttribute=null;
+	set nodeBars.isShown=false;
+	set nodeLabels.colorAttribute="User selection";
+	set nodeLabels.displayAttribute="Node ages";
+	set nodeLabels.fontName="sansserif";
+	set nodeLabels.fontSize=8;
+	set nodeLabels.fontStyle=0;
+	set nodeLabels.isShown=false;
+	set nodeLabels.significantDigits=4;
+	set nodeShapeExternal.colourAttribute=null;
+	set nodeShapeExternal.isShown=false;
+	set nodeShapeExternal.minSize=10.0;
+	set nodeShapeExternal.scaleType=Width;
+	set nodeShapeExternal.shapeType=Circle;
+	set nodeShapeExternal.size=4.0;
+	set nodeShapeExternal.sizeAttribute=null;
+	set nodeShapeInternal.colourAttribute=null;
+	set nodeShapeInternal.isShown=false;
+	set nodeShapeInternal.minSize=10.0;
+	set nodeShapeInternal.scaleType=Width;
+	set nodeShapeInternal.shapeType=Circle;
+	set nodeShapeInternal.size=4.0;
+	set nodeShapeInternal.sizeAttribute=null;
+	set polarLayout.alignTipLabels=false;
+	set polarLayout.angularRange=0;
+	set polarLayout.rootAngle=0;
+	set polarLayout.rootLength=100;
+	set polarLayout.showRoot=true;
+	set radialLayout.spread=0.0;
+	set rectilinearLayout.alignTipLabels=false;
+	set rectilinearLayout.curvature=0;
+	set rectilinearLayout.rootLength=100;
+	set scale.offsetAge=0.0;
+	set scale.rootAge=1.0;
+	set scale.scaleFactor=1.0;
+	set scale.scaleRoot=false;
+	set scaleAxis.automaticScale=true;
+	set scaleAxis.fontSize=8.0;
+	set scaleAxis.isShown=false;
+	set scaleAxis.lineWidth=1.0;
+	set scaleAxis.majorTicks=1.0;
+	set scaleAxis.minorTicks=0.5;
+	set scaleAxis.origin=0.0;
+	set scaleAxis.reverseAxis=false;
+	set scaleAxis.showGrid=true;
+	set scaleBar.automaticScale=true;
+	set scaleBar.fontSize=10.0;
+	set scaleBar.isShown=true;
+	set scaleBar.lineWidth=1.0;
+	set scaleBar.scaleRange=0.0;
+	set tipLabels.colorAttribute="User selection";
+	set tipLabels.displayAttribute="Names";
+	set tipLabels.fontName="sansserif";
+	set tipLabels.fontSize=8;
+	set tipLabels.fontStyle=0;
+	set tipLabels.isShown=true;
+	set tipLabels.significantDigits=4;
+	set trees.order=false;
+	set trees.orderType="increasing";
+	set trees.rooting=true;
+	set trees.rootingType="User Selection";
+	set trees.transform=false;
+	set trees.transformType="cladogram";
+end;
+
